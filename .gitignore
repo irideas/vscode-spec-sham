@@ -1,0 +1,12 @@
+node_modules
+npm-debug.log*
+pnpm-lock.yaml
+yarn.lock
+.DS_Store
+.vscode
+.env.local
+.env.*.local
+.tmp
+.idea
+docs/.vitepress/cache
+docs/.vitepress/dist
