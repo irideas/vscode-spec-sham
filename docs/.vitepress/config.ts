@@ -4,7 +4,7 @@ export default defineConfig({
   lang: 'zh-CN',
   title: 'VS Code 规格与设计',
   description: '以“假装 Visual Studio Code 官方团队”的身份，汇总关键能力的事实需求（SRS）与设计指导（SDD）',
-  base: '/',
+  base: '/vscode-spec-sham/',
   lastUpdated: true,
   appearance: false,
   themeConfig: {
