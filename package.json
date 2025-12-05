@@ -1,0 +1,17 @@
+{
+  "name": "vscode-spec-sham",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "假装 Visual Studio Code 官方开发团队的规格与设计文档站",
+  "scripts": {
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs",
+    "docs:deploy": "npm run docs:build && touch docs/.vitepress/dist/.nojekyll && npx gh-pages -d docs/.vitepress/dist"
+  },
+  "devDependencies": {
+    "gh-pages": "^6.2.0",
+    "vitepress": "^1.4.1"
+  }
+}
