@@ -1,13 +1,53 @@
 # vscode-spec-sham
 
-基于 VitePress 构建的「假装 Visual Studio Code 官方开发团队」规格与设计文档站。
+> “假装 Visual Studio Code 官方团队” 的关键能力规格站，聚焦事实需求（SRS）与设计指导（SDD），由 VitePress 驱动。
 
-## 本地运行
+## 站点定位
+- 每个 VS Code 能力以「章节」形式呈现，统一产出成对的 SRS（规范底线）与 SDD（架构/实现建议）。
+- 当前已上线 **Tree View 生态** 章节，后续会按 `docs/<domain>/` 扩展更多能力（如编辑器、Workbench、远端协作等）。
+- 读者对象涵盖 VS Code 核心工程、扩展开发者、QA/文档/运营以及终端使用者代表，帮助在“事实”与“设计”之间快速对齐。
 
-1. 确认 Node.js 版本：项目默认使用 `.nvmrc` 中的 `v20.19.6`。如未安装，可通过 `nvm install` 或 NodeSource 脚本安装 Node.js 20，再执行 `nvm use` 保持版本一致。
-2. 安装依赖：仓库提供 `.npmrc`，默认将 registry 指向 `registry.npmmirror.com` 并关闭严格证书校验。执行 `npm install` 前若遇到代理拦截（返回 403），可尝试临时清空 `HTTP_PROXY/HTTPS_PROXY`，或改为可访问的内网 npm 源后再重试；若网络完全隔离，可先准备离线包再使用 `npm ci --offline --cache <本地缓存目录>`。
-3. 启动开发服务器：`npm run docs:dev`。
-4. 构建静态站点：`npm run docs:build`，并可通过 `npm run docs:preview` 预览。
-5. 部署到 GitHub Pages：运行 `npm run docs:deploy`，脚本会构建文档、写入 `.nojekyll` 并用 `gh-pages` 将 `docs/.vitepress/dist` 推送至 `gh-pages` 分支；发布仓库 Pages 时，需将来源设置为该分支根目录，且确保 `docs/.vitepress/config.ts` 中的 `base` 为 `/vscode-spec-sham/`。
+## Tree View 章节概览
 
-> 若处于无法访问 npm 官方/镜像源的网络环境，请根据实际可用的代理或离线包管理方式，手动提供 `vitepress` 依赖后再执行上述步骤。
+| 域 | SRS | SDD | 摘要 |
+| --- | --- | --- | --- |
+| Tree View 主域 | [tree-view-srs.md](docs/vscode-tree-view-spec/tree-view-srs.md) | [tree-view-sdd.md](docs/vscode-tree-view-spec/tree-view-sdd.md) | TreeDataProvider/TreeItem/TreeView 的事实要求、6 大用例、跨域接口，以及对应的架构模式、实现清单与端到端流程。 |
+| Workbench 视图与容器 | [workbench-views-and-containers-srs.md](docs/vscode-tree-view-spec/workbench-views-and-containers-srs.md) | [workbench-views-and-containers-sdd.md](docs/vscode-tree-view-spec/workbench-views-and-containers-sdd.md) | 容器注册、激活、布局与上下文传播规范，以及容器工厂、可见性协调、多视图集线器模式。 |
+| Commands / Menus / Keybindings | [commands-menus-and-keybindings-srs.md](docs/vscode-tree-view-spec/commands-menus-and-keybindings-srs.md) | [commands-menus-and-keybindings-sdd.md](docs/vscode-tree-view-spec/commands-menus-and-keybindings-sdd.md) | 命令/菜单/快捷键生命周期、3 个 Tree View 场景与命令适配器、快捷键流程等实现指南。 |
+| Activation & Context System | [activation-and-context-system-srs.md](docs/vscode-tree-view-spec/activation-and-context-system-srs.md) | [activation-and-context-system-sdd.md](docs/vscode-tree-view-spec/activation-and-context-system-sdd.md) | 激活事件、上下文键、when clause 的事实规则与延迟激活、上下文同步、调试模式。 |
+| Configuration & Settings | [configuration-and-settings-srs.md](docs/vscode-tree-view-spec/configuration-and-settings-srs.md) | [configuration-and-settings-sdd.md](docs/vscode-tree-view-spec/configuration-and-settings-sdd.md) | 配置 schema、设置监听、与 Tree View 行为绑定的要求，以及 settings-backed Provider、远端配置模式。 |
+| URI Handler & Deep Links | [uri-handler-and-deep-links-srs.md](docs/vscode-tree-view-spec/uri-handler-and-deep-links-srs.md) | [uri-handler-and-deep-links-sdd.md](docs/vscode-tree-view-spec/uri-handler-and-deep-links-sdd.md) | URI Handler 生命周期、安全约束、深链用例与 reveal/link/auth 实现模式。 |
+
+## 角色视角与阅读顺序
+
+### 谁会看
+- **VS Code 核心 / 平台工程**：关注容器、激活事件、上下文系统的稳定性；重点模型包括 View Container、Context Key Service、URI Handler Pipeline。
+- **扩展开发者（场景作者）**：聚焦 TreeDataProvider/TreeItem/TreeView 三件套如何与命令、配置、URI 等接口协同；核心 API 有 `window.createTreeView`、`registerTreeDataProvider`、`setContext` 等。
+- **QA / 文档 / 运营**：基于各章节的端到端流程与质量门槛设计测试计划与培训材料，关注 when clause、配置覆盖层级、命令/菜单可见性等。
+- **终端使用者代表**（开发者、运维、测试工程师）：从 SDD 的“典型使用者与场景”获取操作指引、文案与风险提示。
+
+### 推荐阅读顺序
+1. **Tree View 主域**：掌握核心 API、生命周期与推荐架构。
+2. **Workbench 容器 + Commands/Menus**：了解 Tree View 的承载容器与交互层。
+3. **Activation/Context + Configuration**：梳理触发、过滤、设置的闭环以及配置驱动模式。
+4. **URI Handler**：理解跨窗口/外部深链的安全约束与扩展模式。
+
+### 利用方式
+- **产品/架构评审**：以 SRS 作为事实依据，SDD 提供实现路径与决策清单。
+- **QA / 文档**：根据“端到端流程 / 质量门槛”章节设计回归脚本、培训内容与运行手册。
+- **扩展作者**：直接引用 Manifest / TypeScript 片段，快速验证 Tree View 方案或对标官方行为。
+
+## 本地开发与部署
+
+### 环境准备
+- Node.js 版本遵循 `.nvmrc`（当前为 `v20.19.6`），执行 `nvm use` 同步版本。
+- 安装依赖：`npm install`（仓库自带 `.npmrc`，可直接使用 npm 官方源或按需调整）。
+
+### 常用脚本
+- `npm run docs:dev`：启动 VitePress 开发服务器（含热更新）。
+- `npm run docs:build`：生成静态站点产物；`npm run docs:preview` 可本地预览构建结果。
+- `npm run docs:deploy`：构建 + 推送 `docs/.vitepress/dist` 至 `gh-pages` 分支。
+
+## 协作与状态
+- 贡献前请阅读 [AGENTS.md](AGENTS.md)，了解沟通语言、协作流程与智能体记录要求。
+- 提交前遵循 AGENTS 规范：明确需求、说明命令执行结果，并保持 SRS/SDD 与实现状态一致。

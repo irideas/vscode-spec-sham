@@ -1,0 +1,41 @@
+name: Deploy VitePress docs to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main          # 每次推送到 main 触发
+  workflow_dispatch:  # 允许手动在 Actions 页面点按钮触发（可选）
+
+permissions:
+  contents: write     # 需要写权限才能推送到 gh-pages 分支
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+        # 如果你项目里没有 package-lock.json，可以改成：
+        # run: npm install
+
+      - name: Build VitePress site
+        run: npm run docs:build
+
+      - name: Deploy to GitHub Pages (gh-pages branch)
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: docs/.vitepress/dist
+          publish_branch: gh-pages
+          # 如果你有自定义域名，可以加：
+          # cname: your.domain.com

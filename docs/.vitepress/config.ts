@@ -2,40 +2,72 @@ import { defineConfig } from 'vitepress'
 
 export default defineConfig({
   lang: 'zh-CN',
-  title: 'VSCode Tree View 规格站',
-  description: '假装 Visual Studio Code 官方开发团队的 Tree View 规格与设计文档站',
-  base: '/vscode-spec-sham/',
+  title: 'VS Code 规格与设计',
+  description: '以“假装 Visual Studio Code 官方团队”的身份，汇总关键能力的事实需求（SRS）与设计指导（SDD）',
+  base: '/',
   lastUpdated: true,
+  appearance: false,
   themeConfig: {
     nav: [
       {
-        text: 'VSCode Tree View 生态的规格文档',
+        text: 'Tree View 生态',
         link: '/vscode-tree-view-spec/'
       }
     ],
     sidebar: {
       '/vscode-tree-view-spec/': [
         {
-          text: 'VSCode Tree View 生态的规格文档',
+          text: 'Tree View 生态',
           items: [
-            { text: 'Tree View 主域 - SRS', link: '/vscode-tree-view-spec/tree-view-srs' },
-            { text: 'Tree View 主域 - SDD', link: '/vscode-tree-view-spec/tree-view-sdd' },
-            { text: 'Workbench 视图与容器 - SRS', link: '/vscode-tree-view-spec/workbench-views-and-containers-srs' },
-            { text: 'Workbench 视图与容器 - SDD', link: '/vscode-tree-view-spec/workbench-views-and-containers-sdd' },
-            { text: 'Commands / Menus / Keybindings - SRS', link: '/vscode-tree-view-spec/commands-menus-and-keybindings-srs' },
-            { text: 'Commands / Menus / Keybindings - SDD', link: '/vscode-tree-view-spec/commands-menus-and-keybindings-sdd' },
-            { text: 'Activation & Context System - SRS', link: '/vscode-tree-view-spec/activation-and-context-system-srs' },
-            { text: 'Activation & Context System - SDD', link: '/vscode-tree-view-spec/activation-and-context-system-sdd' },
-            { text: 'Configuration & Settings - SRS', link: '/vscode-tree-view-spec/configuration-and-settings-srs' },
-            { text: 'Configuration & Settings - SDD', link: '/vscode-tree-view-spec/configuration-and-settings-sdd' },
-            { text: 'URI Handler & Deep Links - SRS', link: '/vscode-tree-view-spec/uri-handler-and-deep-links-srs' },
-            { text: 'URI Handler & Deep Links - SDD', link: '/vscode-tree-view-spec/uri-handler-and-deep-links-sdd' }
+            { text: '章节总览', link: '/vscode-tree-view-spec/' }
+          ]
+        },
+        {
+          text: '核心 API｜Tree View 主域',
+          items: [
+            { text: '事实需求 SRS', link: '/vscode-tree-view-spec/tree-view-srs' },
+            { text: '设计指导 SDD', link: '/vscode-tree-view-spec/tree-view-sdd' }
+          ]
+        },
+        {
+          text: 'Workbench 视图与容器',
+          items: [
+            { text: '事实需求 SRS', link: '/vscode-tree-view-spec/workbench-views-and-containers-srs' },
+            { text: '设计指导 SDD', link: '/vscode-tree-view-spec/workbench-views-and-containers-sdd' }
+          ]
+        },
+        {
+          text: '命令 / 菜单 / 快捷键',
+          items: [
+            { text: '事实需求 SRS', link: '/vscode-tree-view-spec/commands-menus-and-keybindings-srs' },
+            { text: '设计指导 SDD', link: '/vscode-tree-view-spec/commands-menus-and-keybindings-sdd' }
+          ]
+        },
+        {
+          text: '激活与上下文系统',
+          items: [
+            { text: '事实需求 SRS', link: '/vscode-tree-view-spec/activation-and-context-system-srs' },
+            { text: '设计指导 SDD', link: '/vscode-tree-view-spec/activation-and-context-system-sdd' }
+          ]
+        },
+        {
+          text: '配置与设置',
+          items: [
+            { text: '事实需求 SRS', link: '/vscode-tree-view-spec/configuration-and-settings-srs' },
+            { text: '设计指导 SDD', link: '/vscode-tree-view-spec/configuration-and-settings-sdd' }
+          ]
+        },
+        {
+          text: 'URI Handler 与深链',
+          items: [
+            { text: '事实需求 SRS', link: '/vscode-tree-view-spec/uri-handler-and-deep-links-srs' },
+            { text: '设计指导 SDD', link: '/vscode-tree-view-spec/uri-handler-and-deep-links-sdd' }
           ]
         }
       ]
     },
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/placeholder/vscode-spec-sham' }
+      { icon: 'github', link: 'https://github.com/irideas/vscode-spec-sham' }
     ],
     footer: {
       message: '为 VSCode Tree View 生态编写的规格与设计指南（模拟版）',
