@@ -12,7 +12,7 @@
 - 禁止覆盖用户已有的未提交变更，除非得到明确指示。
 
 ## 提交与分支规范
-- 提交信息遵循 Conventional Commits，主题使用中文并包含上下文前缀（如 `feat(tree-view-spec): ...` / `docs(site): ...`），正文使用 `- ` 列表；命令行建议多个 `-m`，避免写字面量 `\n`。
+- 提交信息遵循 Conventional Commits，主题使用中文并包含上下文前缀（如 `feat(tree-view): ...` / `docs(site): ...`），正文使用 `- ` 列表；命令行建议多个 `-m`，避免写字面量 `\n`。
 - 每次提交需确保 `npm run docs:build`、`npm run lint`（若配置）或 `npm run test` 在本地通过；若因环境限制无法执行，需在提交描述中记录障碍。
 - 新开分支命名为 `feature/spec-*`、`docs/spec-*` 或 `fix/spec-*` 等可读格式，避免使用个人名称；推送前确认分支与 PR 描述同步。
 - 废弃或覆盖既有规范内容时，先在 `agents/session-summary.md` 记录原因，再提交代码。

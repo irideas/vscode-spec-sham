@@ -11,12 +11,12 @@
 
 | 域 | SRS | SDD | 摘要 |
 | --- | --- | --- | --- |
-| Tree View 主域 | [tree-view-srs.md](docs/vscode-tree-view-spec/tree-view-srs.md) | [tree-view-sdd.md](docs/vscode-tree-view-spec/tree-view-sdd.md) | TreeDataProvider/TreeItem/TreeView 的事实要求、6 大用例、跨域接口，以及对应的架构模式、实现清单与端到端流程。 |
-| Workbench 视图与容器 | [workbench-views-and-containers-srs.md](docs/vscode-tree-view-spec/workbench-views-and-containers-srs.md) | [workbench-views-and-containers-sdd.md](docs/vscode-tree-view-spec/workbench-views-and-containers-sdd.md) | 容器注册、激活、布局与上下文传播规范，以及容器工厂、可见性协调、多视图集线器模式。 |
-| Commands / Menus / Keybindings | [commands-menus-and-keybindings-srs.md](docs/vscode-tree-view-spec/commands-menus-and-keybindings-srs.md) | [commands-menus-and-keybindings-sdd.md](docs/vscode-tree-view-spec/commands-menus-and-keybindings-sdd.md) | 命令/菜单/快捷键生命周期、3 个 Tree View 场景与命令适配器、快捷键流程等实现指南。 |
-| Activation & Context System | [activation-and-context-system-srs.md](docs/vscode-tree-view-spec/activation-and-context-system-srs.md) | [activation-and-context-system-sdd.md](docs/vscode-tree-view-spec/activation-and-context-system-sdd.md) | 激活事件、上下文键、when clause 的事实规则与延迟激活、上下文同步、调试模式。 |
-| Configuration & Settings | [configuration-and-settings-srs.md](docs/vscode-tree-view-spec/configuration-and-settings-srs.md) | [configuration-and-settings-sdd.md](docs/vscode-tree-view-spec/configuration-and-settings-sdd.md) | 配置 schema、设置监听、与 Tree View 行为绑定的要求，以及 settings-backed Provider、远端配置模式。 |
-| URI Handler & Deep Links | [uri-handler-and-deep-links-srs.md](docs/vscode-tree-view-spec/uri-handler-and-deep-links-srs.md) | [uri-handler-and-deep-links-sdd.md](docs/vscode-tree-view-spec/uri-handler-and-deep-links-sdd.md) | URI Handler 生命周期、安全约束、深链用例与 reveal/link/auth 实现模式。 |
+| Tree View 主域 | [tree-view-srs.md](docs/tree-view/tree-view-srs.md) | [tree-view-sdd.md](docs/tree-view/tree-view-sdd.md) | TreeDataProvider/TreeItem/TreeView 的事实要求、6 大用例、跨域接口，以及对应的架构模式、实现清单与端到端流程。 |
+| Workbench 视图与容器 | [workbench-views-and-containers-srs.md](docs/tree-view/workbench-views-and-containers-srs.md) | [workbench-views-and-containers-sdd.md](docs/tree-view/workbench-views-and-containers-sdd.md) | 容器注册、激活、布局与上下文传播规范，以及容器工厂、可见性协调、多视图集线器模式。 |
+| Commands / Menus / Keybindings | [commands-menus-and-keybindings-srs.md](docs/tree-view/commands-menus-and-keybindings-srs.md) | [commands-menus-and-keybindings-sdd.md](docs/tree-view/commands-menus-and-keybindings-sdd.md) | 命令/菜单/快捷键生命周期、3 个 Tree View 场景与命令适配器、快捷键流程等实现指南。 |
+| Activation & Context System | [activation-and-context-system-srs.md](docs/tree-view/activation-and-context-system-srs.md) | [activation-and-context-system-sdd.md](docs/tree-view/activation-and-context-system-sdd.md) | 激活事件、上下文键、when clause 的事实规则与延迟激活、上下文同步、调试模式。 |
+| Configuration & Settings | [configuration-and-settings-srs.md](docs/tree-view/configuration-and-settings-srs.md) | [configuration-and-settings-sdd.md](docs/tree-view/configuration-and-settings-sdd.md) | 配置 schema、设置监听、与 Tree View 行为绑定的要求，以及 settings-backed Provider、远端配置模式。 |
+| URI Handler & Deep Links | [uri-handler-and-deep-links-srs.md](docs/tree-view/uri-handler-and-deep-links-srs.md) | [uri-handler-and-deep-links-sdd.md](docs/tree-view/uri-handler-and-deep-links-sdd.md) | URI Handler 生命周期、安全约束、深链用例与 reveal/link/auth 实现模式。 |
 
 ## 角色视角与阅读顺序
 
