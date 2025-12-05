@@ -1,4 +1,4 @@
-name: Deploy VitePress docs to GitHub Pages
+name: 发布 vscode-spec-sham 文档站
 
 on:
   push:
@@ -14,24 +14,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: 检出仓库代码
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: 安装 Node.js 环境
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
 
-      - name: Install dependencies
+      - name: 安装 npm 依赖
         run: npm ci
         # 如果你项目里没有 package-lock.json，可以改成：
         # run: npm install
 
-      - name: Build VitePress site
+      - name: 构建 VitePress 文档站
         run: npm run docs:build
 
-      - name: Deploy to GitHub Pages (gh-pages branch)
+      - name: 发布到 GitHub Pages（gh-pages 分支）
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
