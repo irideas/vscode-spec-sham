@@ -8,7 +8,8 @@
 - 所有章节都可在左侧导航中找到，便于按领域浏览或交叉引用。
 
 ## 章节导航
-- [Tree View 生态](./tree-view/)：涵盖 TreeDataProvider/TreeItem/TreeView、Workbench 容器、命令体系、激活与上下文、配置以及 URI 深链的 SRS/SDD 组合。
+- [Tree View 生态](./tree-view/)：TreeDataProvider/TreeItem/TreeView、Workbench 容器、命令体系、激活与上下文、配置，以及与外部入口协同的桥接摘要。
+- [外部入口与集成](./external-entry/)：平台级 URI/深链/外部入口协议、安全与 Remote/Web 行为，含 UC-URI-01~04，用于服务 Tree View、Editor、Webview 等多种消费方。
 - 其他章节（筹备中）：编辑器 API、Panel/Webview 体系、Workbench 布局策略、远程开发协议等，将按相同模式落地。
 
 > 章节内容持续迭代中

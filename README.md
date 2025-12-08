@@ -16,7 +16,8 @@
 | Commands / Menus / Keybindings | [commands-menus-and-keybindings-srs.md](docs/tree-view/commands-menus-and-keybindings-srs.md) | [commands-menus-and-keybindings-sdd.md](docs/tree-view/commands-menus-and-keybindings-sdd.md) | 命令/菜单/快捷键生命周期、3 个 Tree View 场景与命令适配器、快捷键流程等实现指南。 |
 | Activation & Context System | [activation-and-context-system-srs.md](docs/tree-view/activation-and-context-system-srs.md) | [activation-and-context-system-sdd.md](docs/tree-view/activation-and-context-system-sdd.md) | 激活事件、上下文键、when clause 的事实规则与延迟激活、上下文同步、调试模式。 |
 | Configuration & Settings | [configuration-and-settings-srs.md](docs/tree-view/configuration-and-settings-srs.md) | [configuration-and-settings-sdd.md](docs/tree-view/configuration-and-settings-sdd.md) | 配置 schema、设置监听、与 Tree View 行为绑定的要求，以及 settings-backed Provider、远端配置模式。 |
-| URI Handler & Deep Links | [uri-handler-and-deep-links-srs.md](docs/tree-view/uri-handler-and-deep-links-srs.md) | [uri-handler-and-deep-links-sdd.md](docs/tree-view/uri-handler-and-deep-links-sdd.md) | URI Handler 生命周期、安全约束、深链用例与 reveal/link/auth 实现模式。 |
+| URI Handler & Deep Links（Tree 桥接） | [uri-handler-and-deep-links-srs.md](docs/tree-view/uri-handler-and-deep-links-srs.md) | [uri-handler-and-deep-links-sdd.md](docs/tree-view/uri-handler-and-deep-links-sdd.md) | 仅保留 Tree View 协作摘要；平台级协议/安全/Remote 行为详见 `docs/external-entry/uri-and-links-srs.md` / `uri-and-links-sdd.md`。 |
+| 外部入口与集成（独立域） | [docs/external-entry/index.md](docs/external-entry/index.md) | — | 平台级外部入口/URI 集成生态概览，含完整用例 UC-URI-01~04 与安全/Remote 占位。 |
 
 ## 角色视角与阅读顺序
 
@@ -30,7 +31,7 @@
 1. **Tree View 主域**：掌握核心 API、生命周期与推荐架构。
 2. **Workbench 容器 + Commands/Menus**：了解 Tree View 的承载容器与交互层。
 3. **Activation/Context + Configuration**：梳理触发、过滤、设置的闭环以及配置驱动模式。
-4. **URI Handler**：理解跨窗口/外部深链的安全约束与扩展模式。
+4. **外部入口/URI 集成**：平台级协议、安全与 Remote/Web 行为；Tree 侧仅在桥接章节补充协作摘要。
 
 ### 利用方式
 - **产品/架构评审**：以 SRS 作为事实依据，SDD 提供实现路径与决策清单。

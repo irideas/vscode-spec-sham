@@ -1,210 +1,35 @@
-# URI Handler & Deep Links 需求规格说明书 (SRS)
+# URI Handler & Deep Links（Tree View 桥接摘要 SRS）
 
-## 1. 引言
-### 1.1 文档目的
-界定 `vscode://` URI Handler、外部唤起与 Tree View 深度链接的事实规范，确保扩展在处理外部输入时具备安全、可靠、可控的行为。
+本文件只保留“与 Tree View 直接协同”的事实性需求，将平台级 URI/深链能力迁移到 `docs/external-entry` 生态。完整协议、安全、Remote/Web 行为请参阅 `../external-entry/uri-and-links-srs.md`。
 
-### 1.2 范围
-- `window.registerUriHandler`、`vscode.env.uriScheme`、`env.asExternalUri` 的 API 行为；
-- URI 格式设计、参数验证、权限提示；
-- URI 与 Tree View 的联动，包括 `TreeView.reveal`、命令触发、上下文键；
-- 与配置、命令、激活事件的依赖关系。
+## 1. 文档定位与范围
+- 目标：描述 Tree View 在接入外部入口（URI Handler/深链）时必须遵守的最小事实约束，避免与平台级规范重复。
+- 范围：Tree View 可见性与激活、节点定位 (`TreeView.reveal`)、容器切换、上下文键同步、用例引用。URI 生成/校验/安全/Remote 重写等平台细节不在本文件展开。
 
-### 1.3 与 Tree View 的关系概述
-Tree View 可生成深度链接供外部系统跳转，URI 到达后需定位到具体节点（`TreeView.reveal`）或执行命令。反向，Tree View 也可通过 URI Handler 接收外部事件（告警、监控），因此 URI 体系是树视图与外部世界的桥梁。
+## 2. 关联文档
+- 平台级 SRS：`../external-entry/uri-and-links-srs.md`
+- 平台级 SDD：`../external-entry/uri-and-links-sdd.md`
+- 安全/信任占位：`../external-entry/auth-and-trust-srs.md` / `../external-entry/auth-and-trust-sdd.md`
+- Remote/Web 占位：`../external-entry/remote-routing-srs.md` / `../external-entry/remote-routing-sdd.md`
 
-## 2. 总体描述
-### 2.1 URI Handler 生命周期
-1. 扩展声明 `activationEvents: ["onUri"]` 并在 `activate` 中调用 `window.registerUriHandler`；
-2. 外部系统访问 `vscode://<extid>/<path>?query` 时唤起 VS Code，系统根据 `<extid>` 找到扩展；
-3. 扩展在 Handler 中解析 URI、验证参数、执行逻辑；
-4. Handler 返回后 VS Code 继续运行，调用者无需 await。
-> 文中示例以 `vscode://<extid>/...` 表示深链形式；实际生成时应使用 `vscode.env.uriScheme` 获取当前运行环境的 scheme，以兼容 Desktop/Web/Codespaces 等形态。
+## 3. Tree View 协同的事实约束
+1) **视图可见性与激活**：URI 触达时扩展已由 `onUri`（或隐式命令激活）拉起，需确保目标 Tree View Provider 已注册；若视图不在当前容器，可执行 `workbench.view.extension.<container>` 使其可见。  
+2) **节点定位**：`TreeView.reveal` 需要可解析的节点对象；Provider 应提供基于业务主键的查找（例如 `resolveNodeById`）并在未找到时优雅提示。`TreeItem.collapsibleState` 为 `None` 时不会调用 `getChildren`。  
+3) **上下文键与菜单状态**：当通过 URI 选中/聚焦节点后，应保持与用户手动点击等价的上下文键（如 `view == <id>`、`viewItem == <contextValue>`），以便命令/菜单/快捷键正常生效。  
+4) **链接生成**：Tree 侧生成可分享链接时应使用 `vscode.env.uriScheme`，不要硬编码 `vscode://`；高风险操作的链接必须在消费端弹出确认（安全细节见外部入口 SRS）。  
+5) **性能与用户体验**：深链落点通常直达具体节点；应避免在 `handleUri` 内做重 IO，必要时异步加载并以“正在定位/未找到”提示收束。
 
-### 2.2 Deep Link 格式
-- 路径通常包含动作（`/reveal`, `/open`, `/auth`）；
-- Query 参数用于节点 ID、视图 ID、过滤条件、签名；
-- URI 应可通过 `Uri.parse` 解析，并支持 `URLSearchParams`；
-- 当需要跨设备分享时，扩展可调用 `env.asExternalUri` 生成带端口映射的外部链接。
+## 4. 典型协作场景（引用）
+- **UC-URI-01** 告警/通知直达节点：外部链接 → `onUri` → 容器切换 → `TreeView.reveal`。  
+- **UC-URI-02** 节点分享链接：节点右键生成深链，接收方点击后在同一视图定位。  
+- **UC-URI-03** OAuth/设备登录回调：浏览器完成认证 → `onUri` 写入凭据 → 刷新 Tree View 状态。  
+- **UC-URI-04** 批量跳转执行命令：URI 携带多节点/命令参数，依次 reveal 或批处理。  
+> 用例详情、参数设计和安全约束见 `../external-entry/uri-and-links-srs.md#5-tree-view-协作摘要` 及相关章节。
 
-### 2.3 安全与权限
-- 处理 URI 前必须验证来源（可在 query 中附带 token 或签名）；
-- 若 URI 会执行高风险命令（删除、上传），需显示确认对话框；
-- Handler 不得阻塞 UI，如需长耗时应 `await` 异步任务；
-- 任何解析错误需向用户反馈而非静默失败。
-
-### 2.4 Tree View 端到端流程
-1. Tree View 通过命令/菜单生成 `vscode://` 链接，包含 `view`、`nodeId`、过滤器等信息；
-2. 用户在浏览器或通知中点击链接，VS Code 通过 `onUri` 激活扩展，并在需要时执行 `onView:<id>`；
-3. Handler 解析参数、校验权限/签名，必要时先切换容器（`workbench.view.extension.<container>`）；
-4. Provider 根据 `nodeId` 从缓存或远端加载节点，调用 `TreeView.reveal` 聚焦；
-5. 若节点不存在或权限不足，提示用户 fallback（打开搜索/文档或重新登录）。
-
-## 3. 功能需求
-### 3.1 Handler 注册
-- 扩展应在 `activate` 时注册唯一 Handler；
-- Handler 返回 `Disposable`，停用时释放；
-- 若扩展需要多个 Handler，应在单个 `handleUri` 内根据 `uri.path` 区分。
-
-### 3.2 URI 参数解析
-- 对所有 query 参数进行校验（类型、是否必需、长度）；
-- 支持 `encodeURIComponent`；
-- 解析失败时调用 `window.showErrorMessage` 并记录日志；
-- 建议使用 `URL`/`URLSearchParams` 简化解析。
-- 对外部传入的参数实行白名单解析，禁止直接拼接为 shell 命令或文件路径。
-- 对可能触发删除/覆盖等破坏性行为的 Deep Link，必须在 UI 层弹出明确确认对话框。
-
-### 3.3 与 Tree View Reveal 协调
-- Handler 需确保对应 Tree View 已创建并可见，可通过 `commands.executeCommand('workbench.view.extension.<container>')`；
-- Provider 应提供 `resolveNodeById` 或 `getCachedNode` 方法；
-- Reveal 前需构建节点路径（`TreeDataProvider.getParent`）；
-- 若节点不存在，需友好提示并可选择 fallback（例如打开搜索面板）。
-
-## 4. Tree View 用例
-
-### 4.1 UC-URI-01 告警通知深链 Tree View 节点
-**场景**：监控系统在邮件/IM 中推送 `vscode://cloud-ext/reveal?view=cloudAssets&nodeId=cluster-42`，开发者点击后 VS Code 展开 Tree View 并选中节点。
-
-**流程**：
-1. 扩展声明 `onView:cloudAssets` 与 `onUri` 激活；
-2. Handler 解析视图 ID 与节点 ID；
-3. 若视图未可见，执行 `workbench.view.extension.cloudCenter` 命令；
-4. 调用 Provider 的 `resolveNodeById` 并 `treeView.reveal`；
-5. 失败时显示警告。
-
-**Manifest**：
-```json
-{
-  "activationEvents": ["onView:cloudAssets", "onUri"],
-  "contributes": {
-    "commands": [
-      { "command": "cloudAssets.copyLink", "title": "复制资源链接" }
-    ]
-  }
-}
-```
-
-**TypeScript**：
-```ts
-const treeView = vscode.window.createTreeView("cloudAssets", { treeDataProvider: provider });
-
-vscode.window.registerUriHandler({
-  async handleUri(uri) {
-    if (uri.path !== "/reveal") { return; }
-    const params = new URLSearchParams(uri.query);
-    const nodeId = params.get("nodeId");
-    if (!nodeId) {
-      vscode.window.showErrorMessage("缺少 nodeId");
-      return;
-    }
-    await vscode.commands.executeCommand("workbench.view.extension.cloudCenter");
-    const node = await provider.resolveNodeById(nodeId);
-    if (node) {
-      await treeView.reveal(node, { expand: true, focus: true });
-    } else {
-      vscode.window.showWarningMessage(`未找到资源 ${nodeId}`);
-    }
-  }
-});
-```
-
-### 4.2 UC-URI-02 Tree View 生成分享链接
-**场景**：成本树允许用户复制某个节点的分享链接并发送给同事。链接中包含 `view`、`nodeId` 与可选过滤条件。
-
-**流程**：
-1. TreeItem 上的上下文菜单调用 `costInsights.copyLink`；
-2. 命令读取节点 ID 与当前过滤配置，构造 URI；
-3. 将 URI 写入剪贴板并提示成功；
-4. 接收方点击链接，触发前述 Handler。
-
-**Manifest**：
-```json
-{
-  "contributes": {
-    "menus": {
-      "view/item/context": [
-        { "command": "costInsights.copyLink", "when": "view == costInsights", "group": "inline" }
-      ]
-    },
-    "commands": [ { "command": "costInsights.copyLink", "title": "复制深度链接" } ]
-  }
-}
-```
-
-**TypeScript**：
-```ts
-vscode.commands.registerCommand("costInsights.copyLink", (node: CostNode) => {
-  const config = vscode.workspace.getConfiguration("costInsights");
-  const query = new URLSearchParams({
-    view: "costInsights",
-    nodeId: node.id,
-    groupBy: config.get("groupBy", "service")
-  });
-  const uri = vscode.Uri.parse(`vscode://${vscode.env.appName === 'Visual Studio Code - Insiders' ? 'my-ext-insiders' : 'my-ext'}/reveal?${query.toString()}`);
-  vscode.env.clipboard.writeText(uri.toString());
-  vscode.window.showInformationMessage("已复制链接");
-});
-```
-
-### 4.3 UC-URI-03 外部浏览器 → VS Code 的认证流
-**场景**：扩展在浏览器中完成 OAuth 后需要回调 VS Code，以刷新 Tree View 中的凭证节点。
-
-**流程**：
-1. 扩展调用 `env.asExternalUri` 获取用户可点击的 HTTPS 链接（VS Code 代理 VS Code URI）；
-2. 浏览器完成认证后重定向至 `vscode://ext/auth?token=<jwt>`；
-3. Handler 验证 token，存储凭据，并刷新 Tree View；
-4. Tree View message 显示“已登录”。
-
-**TypeScript**：
-```ts
-async function startLogin() {
-  const localUri = vscode.Uri.parse("vscode://cloud-ext/auth");
-  const external = await vscode.env.asExternalUri(localUri);
-  vscode.env.openExternal(external);
-}
-
-vscode.window.registerUriHandler({
-  async handleUri(uri) {
-    if (uri.path !== "/auth") { return; }
-    const token = new URLSearchParams(uri.query).get("token");
-    if (!token) { vscode.window.showErrorMessage("缺少 token"); return; }
-    await authStore.save(token);
-    provider.refresh();
-    cloudView.message = "已连接到云账户";
-  }
-});
-```
-
-### 4.4 UC-URI-04 多节点跳转：URI 批量指令
-**场景**：测试结果 Tree View 支持 URI `vscode://test-ext/focus?ids=a,b,c`，激活后自动选择多个节点并执行命令。
-
-**TypeScript**：
-```ts
-vscode.window.registerUriHandler({
-  async handleUri(uri) {
-    if (uri.path !== "/focus") { return; }
-    const ids = (new URLSearchParams(uri.query).get("ids") ?? "").split(",").filter(Boolean);
-    if (!ids.length) { return; }
-    const nodes = await provider.resolveNodes(ids);
-    treeView.reveal(nodes[0], { expand: true });
-    treeView.selection = nodes;
-    vscode.commands.executeCommand("suiteTree.reRunFailed", nodes);
-  }
-});
-```
-
-## 5. 非功能需求
-- **安全**：对所有 URI 参数进行验证与消毒，必要时增加签名或一次性 token；
-- **可用性**：当 VS Code 被外部 URI 唤起但工作区未打开时，应提示用户先打开合适的工作区；
-- **可靠性**：处理多 URI 并发时需排队，防止同时 `reveal` 导致冲突；
-- **隐私**：禁止在 URI 中包含用户私密信息（密码、访问密钥）。
-
-### 5.3 质量门槛
-- Handler 需在 500ms 内给出成功或错误反馈，否则显示加载信息；
-- 链接需兼容 VS Code Stable/Insiders 及不同平台的 scheme；
-- QA 应覆盖“生成 → 浏览器 → VS Code → reveal”闭环，并模拟网络失败/权限不足情况。
+## 5. 实践建议（非约束）
+- 保持“命令/服务”负责业务逻辑，URI Handler 只做解析与路由；通过 `onDidChangeTreeData` 触发 UI 刷新。  
+- 为分享链接定义稳定的节点主键（路径/ID），避免依赖易变显示文本。  
+- 深链落点前可先校验权限/状态，失败时提供 fallback（例如打开搜索或帮助文档）。
 
 ## 6. 未来演进
-- 提供声明式 `deeplinks` 配置，自动生成 Handler 模板；
-- 支持跨工作区路由（当 node 属于特定 workspace 时提示切换）；
-- 引入 URI 调试控制台，方便开发者测试不同深链。
+- 后续若 Tree View 侧需要新的上下文键同步/容器切换能力，将在本文件补充；平台级外部入口的新增特性统一归档于 `docs/external-entry`。
