@@ -1,5 +1,11 @@
 # 变更日志
 
+## 0.3.0 - 2025-12-08
+- 外部入口域充实：安全/信任、Remote/Web 路由 SRS/SDD 由占位升级为可用供给规范；URI 平台文档补足生命周期、路由、安全与消费方接口描述。
+- Tree 深链协同：Tree 侧 SRS/SDD 重写，明确激活/容器切换/主键查找/reveal/上下文同步的事实与模式；外部入口文档矩阵与 Tree 生态对齐。
+- 写作与链接规范：AGENTS 增补文档矩阵格式、交叉引用与提交前自检要求；全站链接统一为可点击绝对路径。
+- 构建：`npm run docs:build` 通过。
+
 ## 0.2.0 - 2025-12-08
 - Tree View 生态 12 章文档进入最终发布态：补充术语统一、事实纠偏（onCommand 自动激活、TreeDataProvider 调用语义、checkbox 自动/手动模式、URI scheme/asExternalUri 等）。
 - 增强可导航性：规划用例编号/索引，统一代码示例模板（`activate(context)` + `context.subscriptions.push`），入口/首页重构并清理重复目录。
