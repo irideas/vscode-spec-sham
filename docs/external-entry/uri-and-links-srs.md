@@ -1,44 +1,63 @@
-# URI 与外部链接需求规格说明书 (SRS)
+# URI 与外部链接需求规格说明书（平台供给域）
 
-## 1. 引言
-本文定义 VS Code 外部入口与 URI 相关能力的事实规范：`window.registerUriHandler`、`onUri` 激活、`vscode.env.uriScheme`、`asExternalUri`、`openExternal`，以及与安全/远程环境相关的约束。适用于所有消费方（Tree View、Editor、Webview、Terminal、Debug 等），Tree View 协作模式在后文摘要并在 Tree View 小册子中作引用。
+本 SRS 定义 VS Code 提供的外部入口能力的事实：`window.registerUriHandler`、`onUri` 激活、`vscode.env.uriScheme`、`asExternalUri`、`openExternal`，以及参数、安全、Remote/Web 行为的约束。消费侧（Tree/Editor/Webview/Terminal/Debug 等）的细节应在对应域展开，Tree 深链用例以 `tree-view-srs.md` 为主。
 
-## 2. 能力范围与基线
-- 引擎基线：默认 `engines.vscode` ≥ 1.80，包含 URI Handler 与 checkbox/Views Welcome 等相关特性；Remote/Web/Codespaces 需考虑 URI 重写与端口/authority 变更。
-- 能力边界：系统级 URI Handler、外部深链生成/解析、Remote/Web `asExternalUri` 重写、`openExternal` 调用。
+## 1. 范围与基线
+- 基线：默认 `engines.vscode` ≥ 1.80；Remote/Web/Codespaces 环境需考虑 URI 重写与 authority/端口差异。
+- 范围：系统级 URI Handler 注册/激活、URI 构造与解析、跨环境重写、外部打开、错误与安全约束；不覆盖各消费方的 UI/业务逻辑。
 
-## 3. 平台级事实
-### 3.1 URI Handler 生命周期
-- 扩展通过 `window.registerUriHandler` 注册单例；`onUri` 激活事件在收到目标 URI 时触发扩展。
-- 对出现在 `contributes.commands` 的命令，VS Code 自动处理命令激活，无需重复声明 `onCommand`；仅未声明或兼容旧引擎时手写。
+## 2. 术语与模型
+- **URI Handler**：`window.registerUriHandler` 注册的单例，处理系统发来的 `Uri`。
+- **uriScheme**：当前产品注册的自定义 scheme，由 `vscode.env.uriScheme` 提供（Desktop/Insiders/Web 可能不同）。
+- **asExternalUri**：在 Remote/Web/Codespaces 下将内部 URI 重写为客户端可访问的外部 URI。
+- **激活事件**：`onUri`（平台入口）、`onCommand:<id>`（命令声明自动生成，兼容旧引擎时可显式声明）。
+- **消费方**：Tree/Editor/Webview/Terminal/Debug 等，由命令/Service 承接 Handler 结果。
 
-### 3.2 Scheme 与环境行为
-- `vscode.env.uriScheme` 提供当前产品线的 scheme（如 vscode/vscode-insiders，Web 场景可能不同）；生成深链时应使用该值而非硬编码。
-- `vscode.env.asExternalUri` 在 Remote/Web/Codespaces 下重写 URI，使客户端可访问（端口/authority 可能变化）；Desktop 本地场景通常返回原值。
-- `vscode.env.openExternal` 请求操作系统/浏览器打开外部 URI。
+## 3. 平台事实与约束
+### 3.1 注册与激活
+- 一个扩展通常注册一个 Handler；收到匹配 `uriScheme://<extId>/...` 时触发 `onUri` 激活并调用 `handleUri(uri)`。
+- 出现在 `contributes.commands` 的命令执行时自动激活扩展（隐式 `onCommand`），通常无需重复写入 `activationEvents`。
 
-### 3.3 协议与安全约束
-- 参数解析需使用 `URL/URLSearchParams`，对 query/path 做白名单校验，禁止直接拼接为 Shell/文件路径。
-- 破坏性操作（删除/覆盖/推送）必须经用户确认对话框；敏感信息不得出现在可共享 URI。
-- URI Handler 结束后，应清理敏感上下文/状态。
+### 3.2 URI 构造/解析
+- 组成：`scheme`（来自 `uriScheme`）+ `authority`（扩展 ID）+ `path` + `query`（使用 `URLSearchParams`）+ 可选 `fragment`。
+- 解析需使用 `Uri`/`URL`/`URLSearchParams`，对 query/path 做白名单校验，禁止拼接为 Shell/文件路径。
+- `openExternal` 请求 OS/浏览器处理外部 URI；不保证目标程序存在，失败需提示。
 
-## 4. 通用应用模式（非 Tree 专属）
-- OAuth/设备登录回调：浏览器 → `asExternalUri` 重写 → `onUri` → 存储凭证/刷新状态。
-- 从网页/IM/脚本打开 VS Code 资源：`vscode.env.uriScheme://<extId>/open?...` → 执行命令或打开 Editor/Webview。
-- 远程/代码空间入口：外部链接唤起 VS Code 客户端并连接到远程环境（需配合 `asExternalUri`）。
+### 3.3 环境差异
+- **Desktop 本地**：`asExternalUri` 通常返回原值；`uriScheme` 如 `vscode`/`vscode-insiders`。  
+- **Remote/Web/Codespaces**：`asExternalUri` 可能重写 authority/端口/路径以供客户端访问；生成可共享链接时必须先重写。  
+- URI 只保证路由到当前客户端实例，不能假定多窗口广播。
 
-## 5. Tree View 协作摘要
-- Deep Link → Service → `TreeView.reveal`，需确保 Provider 已注册、容器可见（可调用 `workbench.view.extension.<container>`）。
-- 节点生成分享链接：使用 `uriScheme` 构造，包含视图/节点 ID/过滤参数；复制后他人可点击定位。
-- 上下文键/菜单/快捷键：URI 触发后可能需要同步上下文键以驱动 Tree View 菜单/快捷键状态。
+### 3.4 安全与隐私
+- 参数必须白名单解析；敏感信息不得放入可分享 URI。  
+- 破坏性操作（删除/覆盖/推送）必须有用户确认对话框；无提示执行视为违规。  
+- 处理后应清理敏感状态/缓存，避免在多窗口/重载后泄露。
 
-## 6. 用例（归档）
-- UC-URI-01：告警/通知深链到特定节点/资源。
-- UC-URI-02：复制分享链接（含视图/过滤参数）。
-- UC-URI-03：外部浏览器 OAuth/设备登录回 VS Code 刷新状态。
-- UC-URI-04：批量节点/资源跳转并执行命令。
+### 3.5 错误与日志
+- 解析失败、权限不足、目标不存在时需提示用户（如 `showErrorMessage/showWarningMessage`）并可记录日志/遥测。  
+- Handler 不得长时间阻塞主线程；长耗时应使用异步并反馈状态。
 
-## 7. 未来扩展（占位）
-- PR/Issue/Review 深链到 Editor/SCM 视图。
-- Chat/Terminal/Debug 入口的统一 URI 约定。
-- Remote/Tunnel 下的多实例路由策略。
+### 3.6 兼容性
+- 如需兼容低版本引擎，可显式声明 `onCommand`；Remote/Web 行为以当前 `asExternalUri` 实测为准。  
+- `TreeItem.command.arguments` 等消费方参数不会持久化，URI 参数需可重建状态。
+
+## 4. 供给流程（平台链路）
+1. 外部入口生成 URI（推荐 `uriScheme`，Remote/Web 先 `asExternalUri`）。  
+2. OS/浏览器触发 VS Code → 路由至目标扩展 → `onUri` 激活。  
+3. Handler 解析/校验参数 → 路由到命令/Service → 消费方（Tree/Editor/Webview 等）执行。  
+4. 结束前：必要的确认/提示、错误处理、敏感信息清理。
+
+## 5. 消费方协作接口（引用）
+- Tree View：节点定位/分享链接、上下文同步，详见 [Tree 深链协同 SRS](/tree-view/uri-handler-and-deep-links-srs) 与 [Tree 主域 SRS](/tree-view/tree-view-srs) 的 UC-TREE-06。  
+- 其他消费方（占位）：Editor/SCM（打开文件/PR/差异）、Webview（面板唤起）、Terminal/Debug/Chat（会话/会话参数）。本域不展开业务细节。
+
+## 6. 用例映射（平台侧描述）
+- **UC-URI-01**：外部入口直达资源/节点（Tree 细节见 UC-TREE-06）。  
+- **UC-URI-02**：分享链接生成/消费（Tree 细节见 UC-TREE-05/06）。  
+- **UC-URI-03**：浏览器 OAuth/设备登录回调（消费方自行刷新状态）。  
+- **UC-URI-04**：批量 URI 触发命令/定位（Tree 批量落点见 Tree 章节）。
+
+## 7. 未来演进（非当前事实）
+- 统一多窗口/多实例的路由策略或系统弹框；  
+- 提供官方工具方法/库辅助生成/验证深链格式与签名；  
+- 扩展到 PR/Issue/Chat/Terminal 等更多入口的标准化约定。

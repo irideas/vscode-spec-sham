@@ -1,6 +1,6 @@
 # VS Code Tree View 生态全览（SRS + SDD 导航）
 
-本页是 Tree View 生态的总览与导览，帮助读者在进入 12 篇 SRS/SDD 前建立统一的认知模型：Tree View 如何声明与激活、如何被 Workbench 承载、又如何与命令/菜单/上下文/配置/深链协同。默认版本基线为 `engines.vscode` ≥ 1.80（包含 TreeItem 复选框、Views Welcome、URI Handler 等能力），落地时请与实际引擎版本对齐。外部入口/深链的完整协议与安全约束已迁移至 `../external-entry` 生态，本册仅保留 Tree View 协作摘要。
+本页是 Tree View 生态的总览与导览，帮助读者在进入 12 篇 SRS/SDD 前建立统一的认知模型：Tree View 如何声明与激活、如何被 Workbench 承载、又如何与命令/菜单/上下文/配置/深链协同。默认版本基线为 `engines.vscode` ≥ 1.80（包含 TreeItem 复选框、Views Welcome、URI Handler 等能力），落地时请与实际引擎版本对齐。外部入口/深链的完整协议与安全约束已迁移至 [外部入口域](/external-entry/)，本册仅保留 Tree View 协作摘要。
 
 ## 角色与阅读路径
 - **VS Code 平台/核心工程**：关注容器布局、激活事件、上下文键稳定性 → 先读 Workbench、Activation 章节，再回看 Tree 主域 SRS 的事实约束。
@@ -23,8 +23,8 @@
 | Commands / Menus / Keybindings | [commands-menus-and-keybindings-srs.md](./commands-menus-and-keybindings-srs.md) | [commands-menus-and-keybindings-sdd.md](./commands-menus-and-keybindings-sdd.md) | 命令/菜单/快捷键生命周期，命令适配器与反模式。 |
 | Activation & Context System | [activation-and-context-system-srs.md](./activation-and-context-system-srs.md) | [activation-and-context-system-sdd.md](./activation-and-context-system-sdd.md) | 激活事件、Context Key 作用域、when clause 调试与延迟激活策略。 |
 | Configuration & Settings | [configuration-and-settings-srs.md](./configuration-and-settings-srs.md) | [configuration-and-settings-sdd.md](./configuration-and-settings-sdd.md) | 配置 schema/范围/监听，settings-backed Provider 与远端配置模式。 |
-| URI Handler & Deep Links（Tree 桥接） | [uri-handler-and-deep-links-srs.md](./uri-handler-and-deep-links-srs.md) | [uri-handler-and-deep-links-sdd.md](./uri-handler-and-deep-links-sdd.md) | 仅保留 Tree View 协作摘要；平台级协议/安全/Remote 行为详见 `../external-entry/uri-and-links-srs.md` / `uri-and-links-sdd.md`。 |
-| 外部入口与集成（独立域） | [../external-entry/index.md](../external-entry/index.md) | — | 平台级外部入口/URI 集成生态概览，含完整用例 UC-URI-01~04 与安全/Remote 占位。 |
+| URI Handler & Deep Links（Tree 桥接） | [uri-handler-and-deep-links-srs.md](./uri-handler-and-deep-links-srs.md) | [uri-handler-and-deep-links-sdd.md](./uri-handler-and-deep-links-sdd.md) | 仅保留 Tree View 协作摘要；平台级协议/安全/Remote 行为详见 [外部入口 SRS](/external-entry/uri-and-links-srs) / [外部入口 SDD](/external-entry/uri-and-links-sdd)。 |
+| 外部入口与集成（独立域） | [外部入口索引](/external-entry/) | — | 平台级外部入口/URI 集成生态概览，含完整用例 UC-URI-01~04 与安全/Remote 占位。 |
 
 ## 用例导航
 - **UC-TREE-01**：团队 TODO（命令/快捷键、多状态节点）  
@@ -33,10 +33,10 @@
 - **UC-TREE-04**：测试执行（异步增量、resolveTreeItem、批量命令）  
 - **UC-TREE-05**：成本分析（配置驱动、阈值/分组、深链生成）  
 - **UC-TREE-06**：深度链接定位节点（URI Handler 联动）  
-- **UC-URI-01**：告警通知深链到特定节点（详情见 `../external-entry/uri-and-links-srs.md`）  
-- **UC-URI-02**：复制分享链接（含视图/过滤参数）（详情见外部入口域）  
-- **UC-URI-03**：外部浏览器 OAuth 回 VS Code 刷新 Tree View（详情见外部入口域）  
-- **UC-URI-04**：批量节点跳转并执行命令（详情见外部入口域）
+- **UC-URI-01**：告警通知深链到特定节点（详情见 [外部入口 SRS](/external-entry/uri-and-links-srs)）  
+- **UC-URI-02**：复制分享链接（含视图/过滤参数）（详情见 [外部入口 SRS](/external-entry/uri-and-links-srs)）  
+- **UC-URI-03**：外部浏览器 OAuth 回 VS Code 刷新 Tree View（详情见 [外部入口 SRS](/external-entry/uri-and-links-srs)）  
+- **UC-URI-04**：批量节点跳转并执行命令（详情见 [外部入口 SRS](/external-entry/uri-and-links-srs)）
 
 ## 质量与实践基线
 - **性能**：目标 `getChildren` < 200ms，局部刷新优先；高频事件需节流。  

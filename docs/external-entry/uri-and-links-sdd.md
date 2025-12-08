@@ -1,34 +1,82 @@
-# URI 与外部链接软件设计说明书 (SDD)
+# URI 与外部链接软件设计说明书（平台供给域 SDD）
 
-本章提供 URI Handler/深链的设计建议与模式，适用于 VS Code 的各类消费方（Tree View、Editor、Webview、Terminal、Debug 等）。平台级事实参见 SRS；本文以推荐实践为主。
+本 SDD 以平台供给视角给出外部入口的设计建议：入口路由、参数验证、安全、Remote/Web 重写，以及向各消费方（Tree/Editor/Webview/Terminal/Debug 等）的接口模式。消费细节在各域展开，Tree 深链实现见 Tree 章节。
 
 ## 1. 设计目标
-- 跨环境可用：Desktop/Remote/Web/Codespaces 下均能生成与解析可用链接。
-- 安全可靠：参数白名单、敏感操作确认、避免注入与无提示执行。
-- 易于协作：通过命令/Service 抽象，支持 Tree View reveal、Editor 打开、Webview 唤起等多消费方。
+- **跨环境可用**：同一入口可在 Desktop/Remote/Web/Codespaces 正常解析；统一使用 `uriScheme`，必要时 `asExternalUri` 重写。  
+- **安全可信**：参数白名单、签名/一次性 token、破坏性操作确认，防止注入与静默执行。  
+- **解耦可扩展**：Handler 只负责解析/路由；消费方通过命令/Service 适配，便于新增 Editor/Webview/Tree 等落点。
 
-## 2. 通用设计模式
-### 2.1 OAuth/设备登录回调
-- 使用 `asExternalUri` 生成回调 URL，浏览器完成登录后回调 `onUri`；在 Handler 中校验 token/签名，存储凭证，刷新 UI。
-### 2.2 Remote/Web 兼容模式
-- 生成深链时始终使用 `vscode.env.uriScheme`；对远端资源先通过 `asExternalUri` 重写，避免客户端不可达。
-### 2.3 跨窗口/多实例策略
-- URI 只保证激活目标扩展实例；如需多窗口广播，使用命令或存储渠道进行后续同步，避免在 Handler 中假设单实例。
+## 2. 参考架构
+```
+外部 URI → Handler → 入口路由器 (解析+匹配 action/view) 
+         → 验证器 (签名/必填/类型/幂等)
+         → 调度器 (commands/Service 调用) 
+         → 消费方适配器 (Tree/Editor/Webview/Terminal/Debug)
+         → 结果/反馈 (提示、遥测、清理敏感数据)
+```
+- 入口路由器：按 `path`/`query` 映射到动作（open/reveal/auth/...）。  
+- 验证器：白名单字段、签名/nonce 检查、过期校验。  
+- 调度器：执行命令或直接调用 Service，禁止在 Handler 中长时间 IO。  
+- 消费方适配器：在各域实现（Tree 见 UC-TREE-06），统一使用命令/Service 而非直接操作 UI。
 
-## 3. Tree View 协作模式
-- **深链定位节点**：URI → Service 查找节点 → `TreeView.reveal`（确保 Provider 已注册、容器可见）；缓存 miss 时优雅失败（提示未找到或定位到上层）。
-- **节点生成分享链接**：命令/菜单读取节点主键，使用 `uriScheme` 构造 `.../reveal?view=<id>&nodeId=<...>`，支持附加过滤参数；复制到剪贴板并提示成功。
-- **上下文同步**：URI 触发后，必要时设置上下文键（如 pendingReveal）驱动菜单/快捷键；处理完毕需清理。
+## 3. 关键设计要点
+### 3.1 入口与路由
+- 使用 `URL/URLSearchParams` 解析，拒绝未知字段，保留 `action`/`view`/`id`/`filters` 等标准键。  
+- 采用表驱动路由：action -> handler 函数，便于扩展/测试。  
+- 对无效 action/必填缺失，立即提示并返回。
 
-## 4. 反模式与安全提示
-- 反模式：直接拼接参数为 Shell/文件路径；忽略 Remote/Web 的 URI 重写；对删除/覆盖操作无确认。
-- 建议：使用 `URL/URLSearchParams` 解析；破坏性操作先弹确认；敏感信息不写入可共享 URI。
+### 3.2 安全与信任
+- 认证/授权：推荐在 query 携带签名/一次性 token，并校验过期/nonce。  
+- 破坏性操作（删除/推送）必须在消费方前弹确认对话框；Handler 层也可加“高风险”标识。  
+- 敏感信息清理：处理完毕后清理内存中的 token/临时状态；避免写入日志。
 
-## 5. 其它消费方占位
-- **Editor/SCM**：PR/Issue/文件/差异深链 → 内置命令 `vscode.open`/`vscode.diff`。
-- **Webview**：使用命令/消息通道唤起特定 Webview 面板，并携带参数。
-- **Terminal/Debug/Chat**：为特定 session/launch/对话生成可重放链接（待后续补充）。
+### 3.3 Remote/Web 策略
+- 生成对外链接时调用 `asExternalUri`，使用重写后的 URI 分发；客户端环境差异由平台处理。  
+- 对需要回环的 OAuth/设备登录流程，始终提供 `asExternalUri` 后的可访问 URL。  
+- 不假设多窗口广播；如需同步，使用存储/消息通道。
 
-## 6. 未来演进
-- 统一外部入口的多租户/多工作区路由策略。
-- 深链格式与权限模型的参考实现或工具库。
+### 3.4 消费方适配（模式）
+- **Tree**：使用 Service 查找节点+父链，调用 `TreeView.reveal`，上下文键同步，详见 [Tree 深链协同 SDD](/tree-view/uri-handler-and-deep-links-sdd) 与 UC-TREE-06。  
+- **Editor/SCM**：通过内置命令 `vscode.open`/`vscode.diff` 打开文件/PR/差异，避免自定义打开逻辑。  
+- **Webview**：命令唤起面板并通过消息传递参数，防止直接在 Handler 中创建/操作 DOM。  
+- **Terminal/Debug/Chat**：占位，可采用会话 ID + action 路由，触发对应命令。
+
+## 4. 推荐实现清单
+- **代码骨架（简化 TypeScript）**：
+```ts
+vscode.window.registerUriHandler({
+  async handleUri(uri) {
+    const url = new URL(uri.toString());
+    const action = url.pathname.replace(/^\\//, '') || 'open';
+    const params = Object.fromEntries(url.searchParams.entries());
+    if (!allowList.has(action)) {
+      return vscode.window.showErrorMessage(`不支持的 action: ${action}`);
+    }
+    if (!validate(params, action)) {
+      return vscode.window.showErrorMessage('参数校验失败');
+    }
+    // 路由到命令/Service（消费方适配）
+    await dispatch(action, params);
+  }
+});
+```
+- **路由表示例**：`reveal`→Tree Service；`open`→Editor 命令；`auth`→登录流程；`bulk`→队列化调度。  
+- **验证函数**：必填字段、类型、签名/nonce 校验；记录遥测。
+
+## 5. 反模式
+- 在 Handler 中直接执行长 IO 或操作 UI；应异步 + 调度到命令/Service。  
+- 硬编码 `vscode://` 或忽略 `asExternalUri`，导致 Remote/Web 链路不可用。  
+- 将敏感 token 放入可共享 URI；对破坏性操作无确认。  
+- 依赖复杂对象作为 `arguments` 在多窗口/重载后持久存在。
+
+## 6. 质量基线与验证
+- 链接可达：Desktop/Remote/Web 均能解析（验证 `asExternalUri` 重写后仍可访问）。  
+- 安全：参数白名单、签名/一次性 token 校验，敏感信息不落盘；高风险操作有确认。  
+- 性能：Handler 轻量，重 IO 交由 Service/命令；错误有提示。  
+- 兼容性：命令激活依赖 `contributes.commands` 自动生成的 `onCommand`，旧引擎才显式声明。
+
+## 7. 演进方向
+- 提供 SDK/工具函数封装常见动作（open/reveal/auth/bulk），降低扩展重复工作。  
+- 统一 PR/Issue/Chat/Terminal 等消费方的 action 约定与权限模型。  
+- 增强多实例/多租户路由策略，避免链接误投。 
