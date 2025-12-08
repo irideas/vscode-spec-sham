@@ -104,7 +104,7 @@
 
 ## 5. 典型用例（用例 ID：UC-TREE-0x）
 
-### 5.1 UC-TREE-01 团队 TODO 树
+### 5.1 UC-TREE-01 团队 TODO 树 {#uc-tree-01}
 **场景**：研发团队希望在 Explorer 中浏览共享 TODO，支持勾选状态同步。
 
 **角色**：开发者、扩展、Workbench。
@@ -174,7 +174,7 @@ export function activate(context: vscode.ExtensionContext) {
 }
 ```
 
-### 5.2 UC-TREE-02 云资源浏览树
+### 5.2 UC-TREE-02 云资源浏览树 {#uc-tree-02}
 **场景**：云运维希望在 Activity Bar 自定义容器中浏览项目/集群/工作负载，拓展需要依托懒加载。
 
 **流程**：
@@ -234,7 +234,7 @@ export function activate(context: vscode.ExtensionContext) {
 - 单次展开的节点量建议控制在可视区内（常见 < 200）并按需分页；`getChildren` 目标耗时 < 200ms。
 - 远端失败时使用 `TreeView.message` 反馈，不要在标题栏反复弹通知。
 
-### 5.3 UC-TREE-03 依赖审计树（命令 + 菜单联动）
+### 5.3 UC-TREE-03 依赖审计树（命令 + 菜单联动） {#uc-tree-03}
 **场景**：安全团队需要按照依赖关系查看许可证与漏洞，并在 Tree View 标题栏提供“刷新”“导出”按钮。
 
 **流程**：
@@ -305,7 +305,7 @@ export function activate(context: vscode.ExtensionContext) {
 }
 ```
 
-### 5.4 UC-TREE-04 测试执行树（异步增量加载）
+### 5.4 UC-TREE-04 测试执行树（异步增量加载） {#uc-tree-04}
 **场景**：测试扩展需要在 Tree View 中呈现测试套件、用例、实时结果，并支持“重新运行失败”命令。
 
 **流程**：
@@ -362,7 +362,7 @@ vscode.commands.registerCommand("suiteTree.reRunFailed", (nodes?: TestNode[]) =>
 - 测试结果树可能高频刷新，建议将 `resolveTreeItem` 用于延迟填充日志描述，并限制单次刷新节点数量；
 - 事件监听应节流，避免在测试运行期间触发过多 `onDidChangeTreeData`。
 
-### 5.5 UC-TREE-05 成本分析树（配置驱动）
+### 5.5 UC-TREE-05 成本分析树（配置驱动） {#uc-tree-05}
 **场景**：FinOps 团队通过 Tree View 查看云成本，视图可根据用户设置（组织、月份、阈值）过滤数据，并支持在视图标题上显示当前配置摘要。
 
 **流程**：
@@ -424,7 +424,7 @@ class CostInsightsProvider implements vscode.TreeDataProvider<CostNode> {
 - 配置变更后应在 200ms 内刷新视图或给出 `TreeView.message` 提示；
 - 成本数据量较大时建议分层加载或提供筛选命令，避免一次性渲染全部节点。
 
-### 5.6 UC-TREE-06 深度链接定位树节点（URI Handler 联动）
+### 5.6 UC-TREE-06 深度链接定位树节点（URI Handler 联动） {#uc-tree-06}
 **场景**：支持从 HTML Dashboard 或通知点击 `vscode://my-ext/insights?view=costInsights&nodeId=svc-1` 后直接在 Tree View 展开并选中对应节点。
 
 **流程**：

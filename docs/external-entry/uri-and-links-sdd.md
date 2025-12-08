@@ -37,7 +37,7 @@
 - 不假设多窗口广播；如需同步，使用存储/消息通道。
 
 ### 3.4 消费方适配（模式）
-- **Tree**：使用 Service 查找节点+父链，调用 `TreeView.reveal`，上下文键同步，详见 [Tree 深链协同 SDD](/tree-view/uri-handler-and-deep-links-sdd) 与 UC-TREE-06。  
+- **Tree**：使用 Service 查找节点+父链，调用 `TreeView.reveal`，上下文键同步，详见 [Tree 深链协同 SDD](/tree-view/uri-handler-and-deep-links-sdd#uc-tree-06-bridge) 与 [UC-TREE-06](/tree-view/tree-view-srs#uc-tree-06)。  
 - **Editor/SCM**：通过内置命令 `vscode.open`/`vscode.diff` 打开文件/PR/差异，避免自定义打开逻辑。  
 - **Webview**：命令唤起面板并通过消息传递参数，防止直接在 Handler 中创建/操作 DOM。  
 - **Terminal/Debug/Chat**：占位，可采用会话 ID + action 路由，触发对应命令。
@@ -77,6 +77,6 @@ vscode.window.registerUriHandler({
 - 兼容性：命令激活依赖 `contributes.commands` 自动生成的 `onCommand`，旧引擎才显式声明。
 
 ## 7. 演进方向
-- 提供 SDK/工具函数封装常见动作（open/reveal/auth/bulk），降低扩展重复工作。  
-- 统一 PR/Issue/Chat/Terminal 等消费方的 action 约定与权限模型。  
+- 提供 SDK/工具函数封装常见入口动作（open/reveal/auth/bulk），降低扩展重复工作。  
+- 统一跨消费方（Tree/Editor/Webview/Terminal/Debug 等）的 action 约定与权限模型。  
 - 增强多实例/多租户路由策略，避免链接误投。 

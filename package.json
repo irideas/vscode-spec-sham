@@ -1,6 +1,6 @@
 {
   "name": "vscode-spec-sham",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "type": "module",
   "description": "假装 Visual Studio Code 官方开发团队的规格与设计文档站",

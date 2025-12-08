@@ -27,16 +27,12 @@
 | 外部入口与集成（独立域） | [外部入口索引](/external-entry/) | — | 平台级外部入口/URI 集成生态概览，含完整用例 UC-URI-01~04 与安全/Remote 占位。 |
 
 ## 用例导航
-- **UC-TREE-01**：团队 TODO（命令/快捷键、多状态节点）  
-- **UC-TREE-02**：云资源浏览（懒加载、容器切换）  
-- **UC-TREE-03**：依赖审计（标题栏、上下文菜单、多选）  
-- **UC-TREE-04**：测试执行（异步增量、resolveTreeItem、批量命令）  
-- **UC-TREE-05**：成本分析（配置驱动、阈值/分组、深链生成）  
-- **UC-TREE-06**：深度链接定位节点（URI Handler 联动）  
-- **UC-URI-01**：告警通知深链到特定节点（详情见 [外部入口 SRS](/external-entry/uri-and-links-srs)）  
-- **UC-URI-02**：复制分享链接（含视图/过滤参数）（详情见 [外部入口 SRS](/external-entry/uri-and-links-srs)）  
-- **UC-URI-03**：外部浏览器 OAuth 回 VS Code 刷新 Tree View（详情见 [外部入口 SRS](/external-entry/uri-and-links-srs)）  
-- **UC-URI-04**：批量节点跳转并执行命令（详情见 [外部入口 SRS](/external-entry/uri-and-links-srs)）
+- [UC-TREE-01](/tree-view/tree-view-srs#uc-tree-01)：团队 TODO（命令/快捷键、多状态节点）  
+- [UC-TREE-02](/tree-view/tree-view-srs#uc-tree-02)：云资源浏览（懒加载、容器切换）  
+- [UC-TREE-03](/tree-view/tree-view-srs#uc-tree-03)：依赖审计（标题栏、上下文菜单、多选）  
+- [UC-TREE-04](/tree-view/tree-view-srs#uc-tree-04)：测试执行（异步增量、resolveTreeItem、批量命令）  
+- [UC-TREE-05](/tree-view/tree-view-srs#uc-tree-05)：成本分析（配置驱动、阈值/分组、深链生成）  
+- [UC-TREE-06](/tree-view/tree-view-srs#uc-tree-06)：深度链接定位节点（URI Handler 联动）  
 
 ## 质量与实践基线
 - **性能**：目标 `getChildren` < 200ms，局部刷新优先；高频事件需节流。  

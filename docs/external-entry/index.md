@@ -25,10 +25,10 @@
 | Remote/Web 路由 | [remote-routing-srs.md](./remote-routing-srs.md) | [remote-routing-sdd.md](./remote-routing-sdd.md) | Remote/SSH/Tunnel/Codespaces/Web 的 URI 重写、scheme 差异、可达性与路由建议。 |
 
 ## 用例导航（平台视角，消费细节见各域）
-- **UC-URI-01**：外部入口直达资源/节点（Tree 细节见 UC-TREE-06）。  
-- **UC-URI-02**：分享链接生成/消费（Tree 细节见 UC-TREE-05/06）。  
-- **UC-URI-03**：浏览器 OAuth/设备登录回调（Tree/Editor 等消费方自定义刷新）。  
-- **UC-URI-04**：批量 URI 触发命令或定位（Tree 批量落点见 Tree 章节）。
+- [UC-URI-01](/external-entry/uri-and-links-srs#uc-uri-01)：外部入口直达资源/节点/视图（多消费方可实现）。  
+- [UC-URI-02](/external-entry/uri-and-links-srs#uc-uri-02)：分享/回放链接的生成与消费（支持签名/过滤参数）。  
+- [UC-URI-03](/external-entry/uri-and-links-srs#uc-uri-03)：浏览器 OAuth/设备登录回调（跨环境回调与安全校验）。  
+- [UC-URI-04](/external-entry/uri-and-links-srs#uc-uri-04)：批量/编排入口（批量执行命令或多落点导航）。
 
 ## 质量与实践基线
 - **安全**：参数白名单解析、敏感信息不入可共享 URI，高风险操作必须确认。  

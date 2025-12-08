@@ -39,12 +39,22 @@
 6) **链接生成**：Tree 侧生成的深链必须使用 `vscode.env.uriScheme`（不可硬编码 `vscode://`），参数用 `URLSearchParams`；涉及删除/覆盖等高风险行为需在消费端显式确认。  
 7) **性能与错误**：`handleUri` 中不得执行阻塞式重 IO；可异步加载并提示“正在定位/未找到”；异常应提示并记录日志，不得吞错。
 
-## 4. 端到端流程（UC-TREE-06 视角）
+## 4. 协作场景（Tree 视角，用例落点）
+### 4.1 UC-TREE-06 深度链接定位节点 {#uc-tree-06-bridge}
 1) 外部入口生成深链（含视图 ID、节点主键、可选过滤器），用户点击触发 `onUri`。  
 2) Handler 校验参数 → 保证 Provider 已注册、视图可见（必要时执行容器切换）。  
 3) Service 按主键查找节点，必要时恢复父链；未找到时提示并可提供 fallback（如打开搜索）。  
 4) 调用 `TreeView.reveal(node, { expand: true, select: true, focus: true })`；同步上下文键，使菜单/快捷键生效。  
 5) 可选：刷新相关区域（遥测、状态消息），避免重复刷新整棵树。
+
+### 4.2 UC-TREE-05 成本分析分享（含深链） {#uc-tree-05-bridge}
+1) 节点右键或命令生成分享链接（视图 ID + 节点主键 + 过滤参数），写入剪贴板。  
+2) 接收方点击链接，按 4.1 流程落点；若配置不同，可提示差异或应用默认配置。  
+3) 高风险（删除/重置预算）需在消费端确认。
+
+### 4.3 UC-TREE-02 资源/告警跳转 {#uc-tree-02-bridge}
+1) 外部告警/资源入口携带节点主键 → 激活扩展 → 容器切换。  
+2) Provider 通过主键解析资源节点，按 4.1 流程 reveal；未找到时提示“资源不存在/无权限”。
 
 ## 5. 兼容性与边界
 - 基线：默认 `engines.vscode` ≥ 1.80，涵盖 URI Handler、Views Welcome、Tree checkbox。更低版本需验证 URI/checkbox 行为差异。  

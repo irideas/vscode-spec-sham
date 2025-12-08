@@ -51,11 +51,26 @@
 - Tree View：节点定位/分享链接、上下文同步，详见 [Tree 深链协同 SRS](/tree-view/uri-handler-and-deep-links-srs) 与 [Tree 主域 SRS](/tree-view/tree-view-srs) 的 UC-TREE-06。  
 - 其他消费方（占位）：Editor/SCM（打开文件/PR/差异）、Webview（面板唤起）、Terminal/Debug/Chat（会话/会话参数）。本域不展开业务细节。
 
-## 6. 用例映射（平台侧描述）
-- **UC-URI-01**：外部入口直达资源/节点（Tree 细节见 UC-TREE-06）。  
-- **UC-URI-02**：分享链接生成/消费（Tree 细节见 UC-TREE-05/06）。  
-- **UC-URI-03**：浏览器 OAuth/设备登录回调（消费方自行刷新状态）。  
-- **UC-URI-04**：批量 URI 触发命令/定位（Tree 批量落点见 Tree 章节）。
+## 6. 用例（平台侧描述，消费方自选）
+### 6.1 UC-URI-01 外部入口直达资源/节点/视图 {#uc-uri-01}
+- 场景：外部系统/脚本/IM 推送 `uriScheme://<ext>/reveal?target=...`，VS Code 唤起后定位到某资源或视图。  
+- 入口要点：`onUri` 激活 → 参数校验（目标 ID/视图 ID/filters）→ 路由到命令/Service；可服务 Tree/Editor/Webview/Terminal 等。  
+- 安全：白名单解析，敏感操作需确认。Remote/Web 需用 `asExternalUri` 生成可用链接。
+
+### 6.2 UC-URI-02 分享/回放链接 {#uc-uri-02}
+- 场景：用户复制某状态/资源的可回放链接，分享给他人或后续自用。  
+- 入口要点：使用 `uriScheme` + `URLSearchParams` 生成，允许附带过滤/分组等参数；消费方执行相同动作或定位。  
+- 安全：可选签名/一次性 token；禁止包含敏感数据；高风险动作需确认。
+
+### 6.3 UC-URI-03 浏览器 OAuth/设备登录回调 {#uc-uri-03}
+- 场景：浏览器完成 OAuth/设备码流程后回调 VS Code。  
+- 入口要点：回调 URI 通过 `asExternalUri` 生成；Handler 校验 token/签名，存储凭证，触发消费方刷新状态（如 Tree/Editor/Webview）。  
+- 安全：校验过期/重放，提示账户切换风险，避免日志泄露。
+
+### 6.4 UC-URI-04 批量/编排入口 {#uc-uri-04}
+- 场景：一个 URI 触发多条命令或多落点导航（批量操作）。  
+- 入口要点：Handler 解析列表，队列/节流调度命令或定位；消费方自行实现批量策略。  
+- 安全：批量 destructive 行为必须逐项或整体确认；参数需白名单与限流。
 
 ## 7. 未来演进（非当前事实）
 - 统一多窗口/多实例的路由策略或系统弹框；  
