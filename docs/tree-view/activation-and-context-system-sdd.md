@@ -1,7 +1,7 @@
 # Activation Events / Context Keys / When Clauses 软件设计说明书 (SDD)
 
 ## 1. 文档目的
-提供 VS Code 激活事件、上下文键与 when clause 系统的设计层指导，确保 Tree View 扩展能在合适时机激活、正确维护上下文并驱动菜单/快捷键。
+提供 VS Code 激活事件、上下文键与 when clause 系统的设计层指导，确保 Tree View 扩展能在合适时机激活、正确维护上下文并驱动菜单/快捷键。本文以设计建议和实践模式为主，非 VS Code 平台硬约束。
 
 ## 2. 与 Tree View 的关系概述
 - `onView:<id>` 决定 Tree View Provider 的延迟加载时机；
@@ -30,7 +30,8 @@
 ## 4. 设计细节
 ### 4.1 延迟激活策略
 - Tree View 应依赖 `onView:<id>` 激活，避免扩展启动延迟；
-- 若命令或 URI 可能在视图未打开前触发，需同时声明 `onCommand:<id>` 或 `onUri`；
+- 对已在 `contributes.commands` 声明的命令，VS Code 会在执行时自动触发 `onCommand:<id>` 激活；仅当命令未出现在 `contributes.commands` 或需兼容旧引擎时再手写 `onCommand:<id>`；
+- 若 URI 可能在视图未打开前触发，需声明 `onUri`；
 - 激活后在 `registerTreeDataProvider` 时最好缓存 Provider，确保 reveal 访问同一实例。
 
 ### 4.2 上下文键作用域
@@ -52,8 +53,7 @@
 // package.json 片段
 {
   "activationEvents": [
-    "onView:dependencyAudit",
-    "onCommand:dependencyAudit.refresh"
+    "onView:dependencyAudit"
   ]
 }
 ```
@@ -112,7 +112,7 @@ if (process.env.NODE_ENV === "development") {
 - 支持 per-view scope 的 `setContext`，减少命名冲突。
 
 ## 8. 端到端校验清单
-1. **激活事件**：为视图、命令、URI 分别声明 `onView`/`onCommand`/`onUri`，并在 `activate` 中输出日志；
+1. **激活事件**：声明必需的 `onView`、必要的 `onUri`；命令若已在 `contributes.commands` 中声明通常无需再写 `onCommand`（仅兼容旧引擎或未声明的命令时补充），并在 `activate` 中输出日志；
 2. **上下文键初始化**：激活后先重置所有扩展自定义键，避免旧状态遗留；
 3. **Selection Hook**：`onDidChangeSelection`、`onDidChangeVisibility` 等事件统一走 ContextSynchronizer；
 4. **调试工具**：在开发模式下注入 `ext.debugWhenClauses` 或借助 `_executeContextKeys.get` 自检；

@@ -19,6 +19,7 @@ Tree View 可生成深度链接供外部系统跳转，URI 到达后需定位到
 2. 外部系统访问 `vscode://<extid>/<path>?query` 时唤起 VS Code，系统根据 `<extid>` 找到扩展；
 3. 扩展在 Handler 中解析 URI、验证参数、执行逻辑；
 4. Handler 返回后 VS Code 继续运行，调用者无需 await。
+> 文中示例以 `vscode://<extid>/...` 表示深链形式；实际生成时应使用 `vscode.env.uriScheme` 获取当前运行环境的 scheme，以兼容 Desktop/Web/Codespaces 等形态。
 
 ### 2.2 Deep Link 格式
 - 路径通常包含动作（`/reveal`, `/open`, `/auth`）；
@@ -50,6 +51,8 @@ Tree View 可生成深度链接供外部系统跳转，URI 到达后需定位到
 - 支持 `encodeURIComponent`；
 - 解析失败时调用 `window.showErrorMessage` 并记录日志；
 - 建议使用 `URL`/`URLSearchParams` 简化解析。
+- 对外部传入的参数实行白名单解析，禁止直接拼接为 shell 命令或文件路径。
+- 对可能触发删除/覆盖等破坏性行为的 Deep Link，必须在 UI 层弹出明确确认对话框。
 
 ### 3.3 与 Tree View Reveal 协调
 - Handler 需确保对应 Tree View 已创建并可见，可通过 `commands.executeCommand('workbench.view.extension.<container>')`；
@@ -59,7 +62,7 @@ Tree View 可生成深度链接供外部系统跳转，URI 到达后需定位到
 
 ## 4. Tree View 用例
 
-### 4.1 告警通知深链 Tree View 节点
+### 4.1 UC-URI-01 告警通知深链 Tree View 节点
 **场景**：监控系统在邮件/IM 中推送 `vscode://cloud-ext/reveal?view=cloudAssets&nodeId=cluster-42`，开发者点击后 VS Code 展开 Tree View 并选中节点。
 
 **流程**：
@@ -105,7 +108,7 @@ vscode.window.registerUriHandler({
 });
 ```
 
-### 4.2 Tree View 生成分享链接
+### 4.2 UC-URI-02 Tree View 生成分享链接
 **场景**：成本树允许用户复制某个节点的分享链接并发送给同事。链接中包含 `view`、`nodeId` 与可选过滤条件。
 
 **流程**：
@@ -143,7 +146,7 @@ vscode.commands.registerCommand("costInsights.copyLink", (node: CostNode) => {
 });
 ```
 
-### 4.3 外部浏览器 → VS Code 的认证流
+### 4.3 UC-URI-03 外部浏览器 → VS Code 的认证流
 **场景**：扩展在浏览器中完成 OAuth 后需要回调 VS Code，以刷新 Tree View 中的凭证节点。
 
 **流程**：
@@ -172,7 +175,7 @@ vscode.window.registerUriHandler({
 });
 ```
 
-### 4.4 多节点跳转：URI 批量指令
+### 4.4 UC-URI-04 多节点跳转：URI 批量指令
 **场景**：测试结果 Tree View 支持 URI `vscode://test-ext/focus?ids=a,b,c`，激活后自动选择多个节点并执行命令。
 
 **TypeScript**：

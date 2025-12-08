@@ -42,6 +42,7 @@
 3. Workbench 根据容器焦点设置上下文键，菜单/快捷键适配。
 4. Tree View visibility 事件触发 Provider 启动/暂停后台任务。
 5. 布局变化（拖动、最小化）由 Workbench 保存，下次会话恢复后继续使用同一 Tree View。
+6. 用户可将视图移动到 Panel 或 Secondary Side Bar，扩展不可假设固定容器位置；布局持久化以 `viewId` 为键，变更 `viewId` 会丢失用户布局。
 
 ## 4. 功能需求
 ### 4.1 视图注册协议
@@ -63,12 +64,13 @@
 ### 4.4 布局恢复
 - Workbench 自动保存视图的展开/折叠状态，无需扩展干预；
 - 若扩展希望在切换容器后恢复特定节点，可利用 `TreeView.reveal` 配合 `onDidChangeVisibility`；
-- 容器支持“锁定侧栏位置”，扩展不应假设 Tree View 永远在 Explorer。
+- 容器支持“锁定侧栏位置”，扩展不应假设 Tree View 永远在 Explorer；若确需默认位置，使用配置或上下文键表达，而非硬编码。
 
 ### 4.5 与其他系统的接口
 - **命令**：`workbench.view.extension.<container>` 命令可将焦点切换到该容器；
 - **设置**：可使用 `workbench.view.alwaysShowHeader` 等内置设置影响容器外观；
 - **URI Handler**：Deep Link 需指明 viewId，容器负责显示视图后 reveal。
+- **Views Welcome**：当 Tree View 尚无节点可显示时，优先通过 `viewsWelcome` 提示用户操作，而非空白或弹窗。
 
 ### 4.6 质量基线与验证
 - 容器切换动画与焦点反馈需保持 100ms 以内响应，扩展代码若存在耗时逻辑应改为懒加载；
@@ -78,7 +80,7 @@
 
 ## 5. Tree View 用例
 
-### 5.1 自定义 Activity Bar 容器承载云资源树
+### 5.1 UC-TREE-02 自定义 Activity Bar 容器承载云资源树
 **场景**：云运维扩展希望在 Activity Bar 提供独立入口，读取多种 Tree View（资源、日志、监控）。
 
 **角色**：云运维、扩展、Workbench。
@@ -121,7 +123,7 @@ treeView.onDidChangeVisibility(e => {
 });
 ```
 
-### 5.2 面板容器中的测试结果树
+### 5.2 UC-TREE-04 面板容器中的测试结果树
 **场景**：测试扩展将运行结果 Tree View 放在 Panel 区域，与终端、调试控制台并列，方便查看日志。
 
 **流程**：
@@ -153,7 +155,7 @@ const resultsView = vscode.window.createTreeView("testResultsTree", {
 vscode.commands.registerCommand("testPanel.focus", () => vscode.commands.executeCommand("workbench.action.focusPanel"));
 ```
 
-### 5.3 Explorer 与自定义容器间的视图迁移
+### 5.3 UC-TREE-05 Explorer 与自定义容器间的视图迁移
 **场景**：用户希望将同一 Tree View 在 Explorer 与自定义容器之间切换，扩展必须保证布局与状态正确恢复。
 
 **流程**：

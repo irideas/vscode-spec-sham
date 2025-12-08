@@ -19,8 +19,8 @@ Tree View 依赖 `onView` 事件延迟激活，`TreeItem.contextValue` 结合上
 ## 3. 总体描述
 ### 3.1 激活事件模型
 - 当某个条件满足（如打开视图、执行命令、接收 URI）时，VS Code 激活扩展；
-- `onView:<id>` 在 Tree View 首次可见或 reveal 时触发，适合延迟加载 Provider；
-- `onCommand:<id>` 用于确保命令在执行前已注册；
+- `onView:<id>` 在视图首次展开或从隐藏变为可见时触发，适合延迟加载 Provider；`TreeView.reveal` 需在扩展已激活并注册 Provider 后才能调用，本身不会额外触发激活；
+- 对于出现在 `contributes.commands` 的命令，VS Code 会在执行时自动触发 `onCommand:<id>` 激活，无需重复写在 `activationEvents` 中；仅当命令未在 `contributes.commands` 声明或需兼容旧引擎时，才手动声明 `onCommand`；
 - 扩展可声明多个激活事件，VS Code 采用逻辑 OR。
 
 ### 3.2 上下文键生命周期
@@ -35,7 +35,12 @@ Tree View 依赖 `onView` 事件延迟激活，`TreeItem.contextValue` 结合上
 - 当相关上下文键变动时，Workbench 自动重新计算 `when`，无需扩展手动刷新；
 - 当 `when` 解析结果为 `false` 时，菜单项隐藏或快捷键失效。
 
-### 3.4 Tree View 协同流程
+### 3.4 Context Key 作用域（全册共用）
+- **全局级**：如 `isWorkspaceTrusted`、`workspaceFolderCount`，对所有视图生效；
+- **视图级**：`view == <id>`、`focusedView == <id>`，用于限定某个 Tree View 的菜单/快捷键；
+- **节点级**：`viewItem == <contextValue>`，用于区分不同节点类型的上下文菜单。
+
+### 3.5 Tree View 协同流程
 1. 声明激活事件与必需命令，保证 Tree View 延迟加载；
 2. 视图激活后注册 Provider/命令，并通过 `setContext` 初始化状态；
 3. Tree View selection/visibility/checkbox 事件驱动上下文键更新；
@@ -45,7 +50,7 @@ Tree View 依赖 `onView` 事件延迟激活，`TreeItem.contextValue` 结合上
 ## 4. 功能需求
 ### 4.1 视图驱动的激活
 - 每个自定义 Tree View 应声明 `onView:<id>` 以确保延迟激活；
-- 若视图依赖命令执行后才展示数据，需额外声明 `onCommand:<command>`；
+- 命令激活：`contributes.commands` 会隐式生成 `onCommand:<id>`，通常无需重复声明；仅对未在 `contributes.commands` 出现的命令或兼容旧引擎时手动写 `onCommand`；
 - `onUri` 用于 Tree View + Deep Link 场景，需结合 URI Handler。
 
 ### 4.2 上下文键管理
@@ -67,7 +72,7 @@ Tree View 依赖 `onView` 事件延迟激活，`TreeItem.contextValue` 结合上
 
 ## 5. Tree View 用例
 
-### 5.1 延迟激活的依赖树
+### 5.1 UC-TREE-03 延迟激活的依赖树
 **场景**：依赖树仅在用户展开视图时加载，避免启动时浪费资源。
 
 **流程**：
@@ -94,7 +99,7 @@ export function activate(ctx: vscode.ExtensionContext) {
 }
 ```
 
-### 5.2 动态上下文：多选时启用批量命令
+### 5.2 UC-TREE-03 动态上下文：多选时启用批量命令
 **场景**：在 Tree View 中选中多个节点时，需要显示“批量删除”命令，并在命令面板/快捷键中使用 `when` 控制。
 
 **流程**：
@@ -125,7 +130,7 @@ treeView.onDidChangeSelection(e => {
 }
 ```
 
-### 5.3 状态过滤：上下文键与 TreeItem.contextValue 联动
+### 5.3 UC-TREE-01 状态过滤：上下文键与 TreeItem.contextValue 联动
 **场景**：TODO Tree View 允许用户选择“仅显示未完成”状态，菜单项和 TreeItem contextValue 需同步更新。
 
 **流程**：
@@ -160,7 +165,7 @@ async function toggleFilter() {
 }
 ```
 
-### 5.4 URI 激活：onUri + setContext 打开深度链接
+### 5.4 UC-TREE-06 URI 激活：onUri + setContext 打开深度链接
 **场景**：成本树支持 `vscode://` 链接，扩展需在接收到 URI 时激活，即使 Tree View 尚未打开。
 
 **流程**：

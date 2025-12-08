@@ -10,18 +10,20 @@
 - 界定与视图容器、命令/菜单、激活事件、配置、URI Handler 的接口；
 - 给出面向 Tree View 的典型用例与代码示例。
 
-### 1.3 术语与缩写
-- **Tree View**：Workbench 中由扩展提供的数据驱动树组件。
-- **TreeDataProvider**：数据接口，负责 `getChildren`、`getTreeItem`、`getParent`、`resolveTreeItem` 等；
-- **TreeItem**：Tree View 节点的展示对象，含 label、collapsibleState、iconPath、checkbox、命令等属性；
-- **TreeView 实例**：`window.createTreeView` / `window.registerTreeDataProvider` 返回的运行时控制器；
-- **View ID**：`contributes.views` 中声明的唯一标识；
-- **When Clause / Context Key**：用于菜单显示与命令可用性的条件系统。
+### 1.3 术语与缩写（全册通用术语表）
+- **Tree View**：Workbench 中由扩展提供的数据驱动树组件，对应运行时的 `TreeView<T>` 实例。
+- **Tree Data Provider / Provider**：实现 `TreeDataProvider<T>` 的扩展侧对象，负责 `getChildren`、`getTreeItem`、`getParent`、`resolveTreeItem` 等。
+- **Tree Item / 节点**：`TreeItem` / `TreeItem2` 对象，含 `label`、`collapsibleState`、`iconPath`、`checkboxState`、命令等属性。
+- **View ID**：`contributes.views` 中声明的唯一标识。
+- **View Container / 视图容器**：Sidebar/Panel/Auxiliary Bar 中托管 Tree View 的容器。
+- **Activation Event / 激活事件**：`activationEvents` 中的条目，如 `onView:<id>`、`onCommand:<id>`。
+- **Context Key / When Clause**：上下文键与 when 表达式，用于控制菜单/快捷键/显隐。
 
 ### 1.4 阅读指引
 - 想快速了解 Tree View 生命周期，可先阅读第 3 章，再跳到第 4.1～4.4；
 - 若需要设计端到端用例，可结合第 5 章与对应 SDD 中的模式；
 - 与伴侣领域的协同要求在 4.5、5.3～5.6 以及“引用”章节列出的官方文档中进一步说明。
+- 代码示例约定：默认使用 `activate(context: vscode.ExtensionContext)` 模式，所有 `TreeView`、`Disposable`、`registerCommand` 等应 `context.subscriptions.push(...)` 管理；`TreeDataProvider.getChildren` 返回 `ProviderResult<T[]>`，`getTreeItem` 返回 `TreeItem | Thenable<TreeItem>`，打开文件优先使用内置命令（如 `vscode.open`）。
 
 ## 2. 引用
 - VS Code 官方文档：《Tree View API》《TreeDataProvider》《TreeItem》《TreeView》参考文档；
@@ -59,11 +61,12 @@
 
 ## 4. 功能性需求
 
-### 4.1 TreeDataProvider 生命周期
+### 4.1 TreeDataProvider 生命周期与调用语义
 - Provider 必须在视图激活后注册，保持与 View ID 一一对应；
-- `getChildren(element?: T)` 必须支持返回同步数组或 Promise；Workbench 将在需要时按节点调用，要求幂等且可处理 `undefined`（根节点）；
+- `getChildren(element?: T)` 返回 `ProviderResult<T[]>`，可返回数组/Promise/`undefined`/`null`，后三者等价于“无子节点”；
+- 当 `TreeItem.collapsibleState` 为 `TreeItemCollapsibleState.None` 时，Workbench 不会再调用 `getChildren`；是否显示展开箭头仅由 `collapsibleState` 控制；
 - `getTreeItem(element: T)` 返回的 `TreeItem` 不得被复用为多个节点，需保证每次调用返回新实例以允许 VS Code 设置附加属性；
-- Provider 必须实现 `onDidChangeTreeData` 事件，当数据改变时调用 emitter；支持传递 `undefined`（刷新整棵树）或具体元素（增量刷新）；
+- Provider 必须实现 `onDidChangeTreeData` 事件，当数据改变时调用 emitter；传入具体节点表示局部刷新，传入 `undefined` 表示整树刷新；VS Code 可能在局部刷新后多次调用 `getChildren`/`getTreeItem`；
 - 可选实现 `getParent`（用于 `TreeView.reveal` 自动构造路径）和 `resolveTreeItem`（懒加载额外字段）。
 
 ### 4.2 TreeDataProvider 模式要求
@@ -73,11 +76,11 @@
 - Provider 必须处理取消（如果 VS Code 传入 `CancellationToken`），并遵循 Workbench 线程模型，不在 `getChildren` 中进行阻塞操作。
 
 ### 4.3 TreeItem 表达能力
-- TreeItem 必须至少定义 `label` 与 `collapsibleState`；
+- TreeItem 必须至少定义 `label` 与 `collapsibleState`；UI 是否显示展开箭头由 `collapsibleState` 决定。
 - 支持 `iconPath`（`ThemeIcon`、本地路径或 URI）、`description`、`tooltip`、`resourceUri`（启用内建图标与 context 复用）、`checkboxState`；
 - `command` 属性用于点击节点时触发命令，命令参数通常包含节点实体；
 - `contextValue` 用于在菜单/命令 when clause 中区分节点类型，支持多个以 `.` 或 `&&` 组合；
-- 对于 checkbox，需要实现 `onDidChangeCheckboxState` 命令或响应 `TreeItem.checkboxState` 的变更（目前 VS Code 会在用户点击时触发 `onDidChangeCheckboxState` 事件给 Provider）。
+- 复选框：默认（`manageCheckboxStateManually=false`）由 VS Code 自动联动父子节点；仅当业务规则需要完全自定义勾选逻辑时设置 `manageCheckboxStateManually=true`，并在 `onDidChangeCheckboxState` 中自行维护 `checkboxState` 与刷新逻辑。
 
 ### 4.4 TreeView 实例行为
 - `window.createTreeView` 支持附加选项：`showCollapseAll`、`canSelectMany`、`manageCheckboxStateManually`；
@@ -89,7 +92,7 @@
 ### 4.5 系统集成约束
 - **视图声明**：`contributes.views` 需提供 `id`、`name`、`contextualTitle`、`when` 等字段，确保与容器（如 `explorer`、`activitybar` 自定义容器）一致；
 - **命令/菜单**：必须通过 `contributes.commands` 注册命令，`contributes.menus` 的 `view/title` 与 `view/item/context` 菜单项使用 `when` 绑定到 TreeItem context；
-- **激活**：若扩展需要在视图首次展开时激活，必须声明 `onView:<id>`；如需响应命令，声明 `onCommand:<id>`；
+- **激活**：`contributes.commands` 中的命令在被调用时自动触发 `onCommand:<id>` 激活；对于未在 `contributes.commands` 声明的命令或兼容旧引擎场景，可手动声明 `onCommand:<id>`；`onView:<id>` 用于首次展开/可见时延迟激活 Provider；
 - **配置**：通过 `contributes.configuration` 声明设置，运行时使用 `workspace.getConfiguration` 读取，并在 `onDidChangeConfiguration` 里刷新 TreeView；
 - **URI Handler**：若 Tree View 支持 `vscode://` 深度链接，扩展必须注册 `window.registerUriHandler` 并实现参数验证，再调用 `TreeView.reveal`；
 - **可访问性**：TreeItem 的 `label` 或 `ariaLabel` 必须符合无障碍要求，checkbox 需提供明确文案。
@@ -99,9 +102,9 @@
 - 建议在 Provider 内记录遥测数据（如加载耗时、节点数量），以便在大型树场景保持 250ms 以内的 UI 响应；
 - 当 REST 请求需要认证或网络访问时，遵循 VS Code 代理/信任设置；必要时提供 `TreeView.message` 告知用户需要登录或信任工作区。
 
-## 5. 典型用例
+## 5. 典型用例（用例 ID：UC-TREE-0x）
 
-### 5.1 团队 TODO 树
+### 5.1 UC-TREE-01 团队 TODO 树
 **场景**：研发团队希望在 Explorer 中浏览共享 TODO，支持勾选状态同步。
 
 **角色**：开发者、扩展、Workbench。
@@ -158,13 +161,20 @@ class TeamTodoProvider implements vscode.TreeDataProvider<TodoItem> {
   }
 }
 
-vscode.commands.registerCommand("teamTodos.markDone", async (item: TodoItem) => {
-  await markTodoDone(item.id);
-  provider.refresh(item);
-});
+export function activate(context: vscode.ExtensionContext) {
+  const provider = new TeamTodoProvider();
+  const todoView = vscode.window.createTreeView("teamTodos", { treeDataProvider: provider, canSelectMany: true });
+
+  context.subscriptions.push(todoView);
+  context.subscriptions.push(vscode.commands.registerCommand("teamTodos.markDone", async (item: TodoItem) => {
+    await markTodoDone(item.id);
+    provider.refresh(item);
+  }));
+  context.subscriptions.push(vscode.commands.registerCommand("teamTodos.openTodo", (uri: vscode.Uri) => vscode.commands.executeCommand("vscode.open", uri)));
+}
 ```
 
-### 5.2 云资源浏览树
+### 5.2 UC-TREE-02 云资源浏览树
 **场景**：云运维希望在 Activity Bar 自定义容器中浏览项目/集群/工作负载，拓展需要依托懒加载。
 
 **流程**：
@@ -210,9 +220,21 @@ class CloudTreeProvider implements vscode.TreeDataProvider<CloudNode> {
     return item;
   }
 }
+
+export function activate(context: vscode.ExtensionContext) {
+  const provider = new CloudTreeProvider();
+  const treeView = vscode.window.createTreeView("cloudAssets", { treeDataProvider: provider, showCollapseAll: true });
+
+  context.subscriptions.push(treeView);
+  context.subscriptions.push(vscode.commands.registerCommand("cloudAssets.openDetail", (node: CloudNode) => openDetail(node)));
+}
 ```
 
-### 5.3 依赖审计树（命令 + 菜单联动）
+**性能与 UX 注意事项**：
+- 单次展开的节点量建议控制在可视区内（常见 < 200）并按需分页；`getChildren` 目标耗时 < 200ms。
+- 远端失败时使用 `TreeView.message` 反馈，不要在标题栏反复弹通知。
+
+### 5.3 UC-TREE-03 依赖审计树（命令 + 菜单联动）
 **场景**：安全团队需要按照依赖关系查看许可证与漏洞，并在 Tree View 标题栏提供“刷新”“导出”按钮。
 
 **流程**：
@@ -269,10 +291,21 @@ class DependencyAuditProvider implements vscode.TreeDataProvider<AuditNode> {
   }
 }
 
-const treeView = vscode.window.createTreeView("dependencyAudit", { treeDataProvider: provider, canSelectMany: true, showCollapseAll: true });
+export function activate(context: vscode.ExtensionContext) {
+  const provider = new DependencyAuditProvider(new AuditClient());
+  const treeView = vscode.window.createTreeView("dependencyAudit", { treeDataProvider: provider, canSelectMany: true, showCollapseAll: true });
+
+  context.subscriptions.push(treeView);
+  context.subscriptions.push(vscode.commands.registerCommand("dependencyAudit.refresh", (node?: AuditNode) => provider.refresh(node)));
+  context.subscriptions.push(vscode.commands.registerCommand("dependencyAudit.export", () => exportReport(provider.snapshot())));
+  context.subscriptions.push(vscode.commands.registerCommand("dependencyAudit.isolate", async (node: AuditNode) => {
+    await isolateDependency(node);
+    provider.refresh(node);
+  }));
+}
 ```
 
-### 5.4 测试执行树（异步增量加载）
+### 5.4 UC-TREE-04 测试执行树（异步增量加载）
 **场景**：测试扩展需要在 Tree View 中呈现测试套件、用例、实时结果，并支持“重新运行失败”命令。
 
 **流程**：
@@ -325,7 +358,11 @@ class SuiteProvider implements vscode.TreeDataProvider<TestNode> {
 vscode.commands.registerCommand("suiteTree.reRunFailed", (nodes?: TestNode[]) => rerun(nodes?.filter(n => n.status === "failed")));
 ```
 
-### 5.5 成本分析树（配置驱动）
+**性能与 UX 注意事项**：
+- 测试结果树可能高频刷新，建议将 `resolveTreeItem` 用于延迟填充日志描述，并限制单次刷新节点数量；
+- 事件监听应节流，避免在测试运行期间触发过多 `onDidChangeTreeData`。
+
+### 5.5 UC-TREE-05 成本分析树（配置驱动）
 **场景**：FinOps 团队通过 Tree View 查看云成本，视图可根据用户设置（组织、月份、阈值）过滤数据，并支持在视图标题上显示当前配置摘要。
 
 **流程**：
@@ -383,7 +420,11 @@ class CostInsightsProvider implements vscode.TreeDataProvider<CostNode> {
 }
 ```
 
-### 5.6 深度链接定位树节点（URI Handler 联动）
+**性能与 UX 注意事项**：
+- 配置变更后应在 200ms 内刷新视图或给出 `TreeView.message` 提示；
+- 成本数据量较大时建议分层加载或提供筛选命令，避免一次性渲染全部节点。
+
+### 5.6 UC-TREE-06 深度链接定位树节点（URI Handler 联动）
 **场景**：支持从 HTML Dashboard 或通知点击 `vscode://my-ext/insights?view=costInsights&nodeId=svc-1` 后直接在 Tree View 展开并选中对应节点。
 
 **流程**：

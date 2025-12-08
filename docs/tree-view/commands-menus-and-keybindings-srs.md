@@ -16,8 +16,8 @@ Tree View 的交互依赖命令系统：点击节点/按钮时调用 `commands.e
 ## 2. 总体描述
 ### 2.1 命令注册流程
 1. 扩展在 `package.json` 中声明命令 ID、标题、分类；
-2. 扩展激活后通过 `vscode.commands.registerCommand` 注册实现函数；
-3. TreeItem/菜单/快捷键引用命令 ID 时，VS Code 会查找该实现并执行，参数来自触发源。
+2. 对出现在 `contributes.commands` 的命令，VS Code 会在命令被调用时自动触发 `onCommand:<id>` 激活，无需重复在 `activationEvents` 声明；仅对未在 `contributes.commands` 出现或兼容旧引擎的命令手动声明 `onCommand`；
+3. 扩展激活后通过 `vscode.commands.registerCommand` 注册实现函数；TreeItem/菜单/快捷键引用命令 ID 时，VS Code 查找该实现并执行，参数来自触发源。
 
 ### 2.2 菜单贡献点
 - `view/title`：Tree View 标题栏按钮，支持 `group` 排序；
@@ -42,7 +42,7 @@ Tree View 的交互依赖命令系统：点击节点/按钮时调用 `commands.e
 ### 3.1 命令生命周期
 - 命令 ID 必须唯一，遵循 `<extension>.action` 命名；
 - 注册函数需返回 `Disposable` 并在扩展停用时释放；
-- TreeItem `command` 参数应包含节点实体或业务 ID，禁止传递非序列化对象（如 `EventEmitter`）；
+- TreeItem `command` 参数应包含节点实体或业务 ID，禁止传递非序列化对象（如 `EventEmitter`）；打开文件/差异类行为推荐使用内置命令 `vscode.open`、`vscode.diff` 并传入 `Uri`；
 - 命令实现应处理未选中节点、视图不可见等情况并给出错误提示。
 
 ### 3.2 菜单 when clause 评估
@@ -64,7 +64,7 @@ Tree View 的交互依赖命令系统：点击节点/按钮时调用 `commands.e
 
 ## 4. Tree View 相关用例
 
-### 4.1 依赖审计树：标题栏刷新与上下文隔离
+### 4.1 UC-TREE-03 依赖审计树：标题栏刷新与上下文隔离
 **场景**：安全团队 Tree View 需要提供刷新、导出按钮及节点右键“隔离”操作。
 
 **角色**：安全工程师、扩展、Workbench。
@@ -108,7 +108,7 @@ vscode.commands.registerCommand("dependencyAudit.isolate", async (node: AuditNod
 });
 ```
 
-### 4.2 TODO 树：快捷键触发批量命令
+### 4.2 UC-TREE-01 TODO 树：快捷键触发批量命令
 **场景**：团队 TODO Tree View 允许用户按 `cmd+shift+d` 批量标记选中项为完成，并在节点 inline action 中显示“重开”。
 
 **流程**：
@@ -158,7 +158,7 @@ vscode.commands.registerCommand("teamTodos.reopen", async (item: TodoItem) => {
 });
 ```
 
-### 4.3 成本分析树：命令面板与深度链接生成
+### 4.3 UC-TREE-05 成本分析树：命令面板与深度链接生成
 **场景**：FinOps Tree View 需要在命令面板中提供“复制节点链接”，同时在标题栏提供“按阈值筛选”按钮，并通过快捷键 `ctrl+alt+f` 打开筛选输入框。
 
 **流程**：

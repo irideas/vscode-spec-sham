@@ -1,7 +1,7 @@
 # URI Handler & Deep Links 软件设计说明书 (SDD)
 
 ## 1. 文档目的
-提供在 VS Code 中实现 `vscode://` URI Handler、外部调用管线与 Tree View 深度链接的设计指南，涵盖安全校验、Reveal 流程与模式示例。
+提供在 VS Code 中实现 `vscode://` URI Handler、外部调用管线与 Tree View 深度链接的设计指南，涵盖安全校验、Reveal 流程与模式示例。本文以设计建议与模式为主，非 VS Code 平台硬性约束。
 
 ## 2. 与 Tree View 的关系概述
 - Tree View 可生成 URI 带上视图/节点信息供外部系统跳转；
@@ -21,6 +21,7 @@
 ### 3.2 External URI Pipeline
 - `env.asExternalUri` 把 `vscode://` 映射为 HTTPS 代理链接，供浏览器/OAuth 使用；
 - 回调进入 VS Code 后由 Handler 再次解析。
+- 在 Remote / Web / Codespaces 场景下，`asExternalUri` 会自动重写端口或代理路径，Handler 应考虑重写后的 host/authority。
 
 ### 3.3 Tree View Integration Layer
 - Provider 提供 `resolveNodeById`/`getCachedNode`；
@@ -34,8 +35,8 @@
 - 对敏感操作要求签名或一次性 token。
 
 ### 4.2 参数到节点映射
-- Provider 维护 `{ id → TreeNode }` 缓存，并在 `getChildren`、`resolveTreeItem` 中填充；
-- 若节点不在缓存，需递归获取父节点构造路径；
+- Provider 维护 `{ id → TreeNode }` 缓存，并在 `getChildren`、`resolveTreeItem` 中填充；ID 推荐使用业务稳定主键（资源 ID/路径），避免依赖 UI 索引；
+- 若节点不在缓存，需递归获取父节点构造路径；当节点已删除时应优雅失败（定位到上层或提示未找到）；
 - Reveal 失败时应提示用户并提供 fallback（比如打开搜索）。
 
 ### 4.3 安全与权限提示

@@ -1,36 +1,50 @@
-# Tree View 生态总览
+# VS Code Tree View 生态全览（SRS + SDD 导航）
 
-Tree View 章节记录 VS Code 中“Explorer / 自定义视图”生态的事实需求与设计准则。该章节帮助读者在阅读单个 SRS/SDD 前，先掌握 Tree View 作为 UI/数据总线的全貌：它如何接收扩展的树形数据、如何被 Workbench 承载、又如何和命令、上下文、配置与深链协作。
+本页是 Tree View 生态的总览与导览，帮助读者在进入 12 篇 SRS/SDD 前建立统一的认知模型：Tree View 如何声明与激活、如何被 Workbench 承载、又如何与命令/菜单/上下文/配置/深链协同。默认版本基线为 `engines.vscode` ≥ 1.80（包含 TreeItem 复选框、Views Welcome、URI Handler 等能力），落地时请与实际引擎版本对齐。
 
-## 能力范围
-- **展示域**：Tree View 自身的注册、渲染与缓存机制；由 `TreeDataProvider` + `TreeItem` 驱动。
-- **承载域**：Workbench View Container（Explorer、Run&Debug 等）提供生命周期、布局与状态持久化。
-- **交互域**：命令、菜单、快捷键与 URI Handler 为 Tree Item、标题栏与节点右键提供行为。
-- **治理域**：激活事件、Context Key、Configuration/Settings 用于驱动显隐与权限。
+## 角色与阅读路径
+- **VS Code 平台/核心工程**：关注容器布局、激活事件、上下文键稳定性 → 先读 Workbench、Activation 章节，再回看 Tree 主域 SRS 的事实约束。
+- **扩展开发者**：聚焦 TreeDataProvider/TreeItem/TreeView 与命令、配置、URI 的协同 → 先读 Tree 主域 SRS/SDD，用例 UC-TREE-01~06，再按“交互→治理→深链”顺序。
+- **QA/文档/运营**：基于用例 ID 和“端到端流程/质量门槛”设计回归 → 用例索引 + 各章的质量基线。
+- **终端使用者代表**：在 SDD 的“使用者视角”小节获取操作提示与风险提醒。
 
-该章节将上述四个域串成一致的执行链：`Manifest & Activation → Provider & State Machine → 命令/配置/URI → 观测与回退`。
+## 全局架构与生命周期
+1. **声明与激活**：`contributes.views`/`viewsContainers` + `contributes.commands`/`menus`/`configuration`；`onView:<id>` 延迟激活，命令在执行时自动激活 `onCommand:<id>`。
+2. **数据与渲染**：Provider 返回 TreeItem（由 `collapsibleState` 决定是否展开，None 不再调用 `getChildren`）；TreeView 负责可见性、选择、checkbox、reveal 等交互。
+3. **承载与布局**：View Container（Sidebar/Panel/Auxiliary）管理焦点、持久化与拖拽迁移；视图空态优先使用 Views Welcome。
+4. **交互闭环**：命令/菜单/快捷键依赖上下文键与 when 表达式，配置驱动显隐/过滤，URI Handler 负责深链与外部唤起。
+5. **观测与安全**：错误提示、遥测、性能目标（如 getChildren 目标 <200ms），以及 URI 参数白名单、破坏性行为确认对话框。
 
-## 核心模型速览
-| 模型/组件 | 职责 | 关联文档 |
-| --- | --- | --- |
-| TreeDataProvider / TreeItem / TreeView | 负责数据拉取、节点唯一标识、刷新与可见状态；是所有 SRS/SDD 的根模型。 | [Tree View SRS](./tree-view-srs.md) / [Tree View SDD](./tree-view-sdd.md) |
-| View Container / View Descriptor Service | 为 Tree View 注册容器、控制布局、托管状态与活跃度。 | [Workbench 视图与容器 SRS](./workbench-views-and-containers-srs.md) / [SDD](./workbench-views-and-containers-sdd.md) |
-| Command Service / Menu Registry / Keybinding Resolver | 建立 Tree Item 与命令之间的契约，维护 when clause、焦点与快捷键链路。 | [Commands/Menus/Keybindings SRS](./commands-menus-and-keybindings-srs.md) / [SDD](./commands-menus-and-keybindings-sdd.md) |
-| Activation Events / Context Key Service | 控制何时激活 Provider、如何派发上下文键并同步至菜单与配置。 | [Activation & Context SRS](./activation-and-context-system-srs.md) / [SDD](./activation-and-context-system-sdd.md) |
-| Configuration/Settings 系统 | 为 Tree View 提供 schema、监听与配置驱动的显隐、排序、远端参数。 | [Configuration & Settings SRS](./configuration-and-settings-srs.md) / [SDD](./configuration-and-settings-sdd.md) |
-| URI Handler | 将外部链接、深链或多窗口导航映射为 Tree View 的 `reveal`/`command` 行为。 | [URI Handler & Deep Links SRS](./uri-handler-and-deep-links-srs.md) / [SDD](./uri-handler-and-deep-links-sdd.md) |
+## 文档矩阵
+| 域 | SRS | SDD | 摘要 |
+| --- | --- | --- | --- |
+| Tree View 主域 | [tree-view-srs.md](./tree-view-srs.md) | [tree-view-sdd.md](./tree-view-sdd.md) | 核心 API 契约、用例 UC-TREE-01~06、刷新/错误语义与设计模式。 |
+| Workbench 视图与容器 | [workbench-views-and-containers-srs.md](./workbench-views-and-containers-srs.md) | [workbench-views-and-containers-sdd.md](./workbench-views-and-containers-sdd.md) | 容器注册/激活/布局与上下文传播，View Location 迁移与焦点链路。 |
+| Commands / Menus / Keybindings | [commands-menus-and-keybindings-srs.md](./commands-menus-and-keybindings-srs.md) | [commands-menus-and-keybindings-sdd.md](./commands-menus-and-keybindings-sdd.md) | 命令/菜单/快捷键生命周期，命令适配器与反模式。 |
+| Activation & Context System | [activation-and-context-system-srs.md](./activation-and-context-system-srs.md) | [activation-and-context-system-sdd.md](./activation-and-context-system-sdd.md) | 激活事件、Context Key 作用域、when clause 调试与延迟激活策略。 |
+| Configuration & Settings | [configuration-and-settings-srs.md](./configuration-and-settings-srs.md) | [configuration-and-settings-sdd.md](./configuration-and-settings-sdd.md) | 配置 schema/范围/监听，settings-backed Provider 与远端配置模式。 |
+| URI Handler & Deep Links | [uri-handler-and-deep-links-srs.md](./uri-handler-and-deep-links-srs.md) | [uri-handler-and-deep-links-sdd.md](./uri-handler-and-deep-links-sdd.md) | URI Handler 生命周期、安全约束、深链用例 UC-URI-01~04 与 reveal/link/auth 模式。 |
 
-## 运行基线
-1. **声明 → 激活**：扩展在 `package.json` 声明 Tree View、激活事件与依赖的 Context/Configuration；Workbench 依据激活条件创建/回收 Provider。
-2. **数据与可视化**：`TreeDataProvider` 负责增量刷新、`TreeItem` 定义外观/交互，View Container 管理折叠、筛选与状态持久化。
-3. **交互闭环**：命令与菜单接受 Tree Item 上下文，快捷键与 when clause 联动；配置与 URI Handler 则为 Tree View 提供扩展入口。
-4. **诊断与回退**：章节中的 SRS 将列出日志、遥测、错误码与回退能力；SDD 提供实现建议与模式。
+## 用例导航
+- **UC-TREE-01**：团队 TODO（命令/快捷键、多状态节点）  
+- **UC-TREE-02**：云资源浏览（懒加载、容器切换）  
+- **UC-TREE-03**：依赖审计（标题栏、上下文菜单、多选）  
+- **UC-TREE-04**：测试执行（异步增量、resolveTreeItem、批量命令）  
+- **UC-TREE-05**：成本分析（配置驱动、阈值/分组、深链生成）  
+- **UC-TREE-06**：深度链接定位节点（URI Handler 联动）  
+- **UC-URI-01**：告警通知深链到特定节点  
+- **UC-URI-02**：复制分享链接（含视图/过滤参数）  
+- **UC-URI-03**：外部浏览器 OAuth 回 VS Code 刷新 Tree View  
+- **UC-URI-04**：批量节点跳转并执行命令
 
-## 文档映射
-- **基线 SRS / SDD**：Tree View 主域阐述 API 契约、用例、刷新策略与错误语义。
-- **承载与布局**：Workbench 章节说明容器、分组、拖拽、焦点竞态。
-- **交互系统**：Commands/Menus/Keybindings 章节解释命令总线、上下文键与键盘体验。
-- **激活与治理**：Activation/Context + Configuration/Settings 描述显隐策略、延迟激活、配置驱动能力。
-- **跨入口**：URI Handler 章节给出深链、外部唤起与安全约束。
+## 质量与实践基线
+- **性能**：目标 `getChildren` < 200ms，局部刷新优先；高频事件需节流。  
+- **安全**：URI 参数白名单解析，破坏性操作需确认对话框；敏感配置用 SecretStorage。  
+- **可用性**：空态用 Views Welcome，checkbox 默认自动联动（手动模式仅用于特殊规则）。  
+- **代码模板**：示例遵循 `activate(context)` + `context.subscriptions.push(...)`、`ProviderResult` 签名，打开文件优先用内置 `vscode.open/diff`。  
+- **事实 vs 建议**：SRS 章节为官方可验证事实，设计/实践建议集中在 SDD 或各章“建议/未来演进”小节。
 
-阅读顺序建议：先通读本页与 Tree View 主域 SRS，随后按“承载 → 交互 → 治理 → 深链”的顺序深入即可。
+## 怎么用
+- **产品/架构评审**：以 SRS 验证平台行为，SDD 选用合适模式。  
+- **QA/文档**：据“端到端流程/质量门槛/用例 ID”编写回归与培训脚本。  
+- **扩展作者**：按用例 ID 查找对应代码片段与 manifest 片段，快速对标官方行为。

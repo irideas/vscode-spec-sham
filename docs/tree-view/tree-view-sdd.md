@@ -1,7 +1,7 @@
 # Tree View 软件设计说明书 (SDD)
 
 ## 1. 文档背景
-本 SDD 描述 VS Code Tree View 主域的内部架构、设计约束与推荐工程实践，确保 VS Code 官方特性及生态扩展对 Tree View 的实现具有一致性、可维护性与可测试性。
+本 SDD 描述 VS Code Tree View 主域的内部架构、设计约束与推荐工程实践，确保 VS Code 官方特性及生态扩展对 Tree View 的实现具有一致性、可维护性与可测试性。除少量事实背景外，本文以设计建议和模式为主，不构成 VS Code 平台的硬性约束。
 
 ## 2. 设计目标与原则
 - **一致性**：不同扩展的 Tree View 共享统一的注册、刷新和交互约定；
@@ -27,6 +27,7 @@
 - **初始化流**：扩展激活 → 注册 Provider → Workbench 请求根节点 → Provider 调用数据服务 → 返回 TreeItem → Workbench 渲染；
 - **刷新流**：数据变更或命令触发 → Provider 更新缓存 → 触发 `onDidChangeTreeData` → Workbench 请求受影响节点；
 - **Reveal/URI 流**：URI Handler/命令提供节点引用 → TreeView.reveal 调用 Provider 的 `getParent`/缓存 → Workbench 展开并聚焦。
+- **进程边界**：TreeDataProvider 完全运行在 Extension Host 进程中，UI 渲染在 Workbench 进程；二者通过 RPC 交互，Provider 不可直接操作 DOM 或依赖 UI 状态。
 
 ### 3.3 运行时依赖
 - **命令/菜单服务**：用于绑定 TreeItem command、右键菜单、标题栏按钮；
@@ -44,6 +45,7 @@
 ### 4.2 TreeDataProvider 层
 - 维护 `Map<string, T>` 缓存，供命令与 `TreeView.reveal` 使用；
 - `getChildren` 需根据节点类型路由到对应服务方法，且支持 `CancellationToken`；
+- 当 `TreeItem.collapsibleState` 为 None 时 UI 不再调用 `getChildren`，展开箭头完全由 `collapsibleState` 控制；
 - `refresh(element?: T)` 包装 `onDidChangeTreeData.fire`，可支持单节点刷新；
 - 当节点数据庞大时，使用“加载更多”虚假节点或从 `contextValue` 推导 pagination 命令；
 - `resolveTreeItem` 用于在节点展开时填充额外信息（日志、tooltip），避免初次渲染开销。
@@ -54,6 +56,17 @@
   - `onDidChangeVisibility`：视图隐藏时暂停轮询或释放资源；
   - `onDidChangeCheckboxState`：当 manageCheckboxStateManually=false 时自动处理，反之需手动更新；
 - 当具备深度链接需求时，暴露 `reveal` 辅助函数，供命令及 URI Handler 调用。
+
+**Checkbox 自动 vs 手动模式示例**：默认由 VS Code 自动维护父子勾选（父选中→已加载子全选，子取消→父取消）；仅当业务规则与父子联动不同步时，将 `manageCheckboxStateManually` 设为 `true` 并在回调里更新状态：
+```ts
+const treeView = vscode.window.createTreeView(\"auditTree\", { treeDataProvider: provider, manageCheckboxStateManually: true });
+treeView.onDidChangeCheckboxState(e => {
+  for (const change of e.changes) {
+    auditStore.update(change.element.id, change.checked === vscode.TreeItemCheckboxState.Checked);
+  }
+  provider.refresh();
+});
+```
 
 ### 4.4 命令与菜单桥接
 - 使用 `registerCommand` 注册所有 TreeItem 命令与标题栏动作，命令参数保持可序列化；

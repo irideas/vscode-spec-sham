@@ -16,8 +16,9 @@
 ## 2. 总体描述
 ### 2.1 配置声明
 - 使用 `contributes.configuration` 声明顶级标题与属性；
-- 每个属性需包含 `type`、`default`、`description` 或 `markdownDescription`；
-- 可通过 `enum` 限制值、`enumDescriptions` 提供说明。
+- 每个属性需包含 `type`、`default`、`description` 或 `markdownDescription`，并明确 `scope`（application/window/resource）；
+- 可通过 `enum`/`enumDescriptions`、`patternProperties`/`additionalProperties` 约束对象型配置，避免无限制结构；
+- 本地化描述应通过 `markdownDescription` 支持多语言。
 
 ### 2.2 设置存储与范围
 - `scope: resource`、`window`、`machine` 控制设置生效级别；
@@ -53,11 +54,17 @@
 - 设置可控制 Tree View 数据源、排序方式、分组、刷新频率、主题；
 - 当设置修改 TreeItem 结构（列/描述）时，需刷新 entire tree；
 - 视图标题栏可显示当前设置摘要，提高透明度；
-- 设置与命令/上下文键一起使用，提高交互性。
+- 设置与命令/上下文键一起使用，提高交互性；当设置影响远端调用或凭证时需提示用户重新登录或重新连接。
+
+### 3.4 配置传播路径（事实）
+- 配置声明 → `workspace.getConfiguration(section, resource?)` 读取合并值；
+- 领域服务接收配置并决定数据源/过滤策略；
+- Provider 将结果映射为 TreeItem（排序/分组/显隐）并触发刷新；
+- 当配置与节点上下文相关时，通过 `setContext` 同步给菜单/快捷键。
 
 ## 4. Tree View 用例
 
-### 4.1 视图开关：配置驱动可见性
+### 4.1 UC-TREE-05 视图开关：配置驱动可见性
 **场景**：FinOps 扩展允许用户关闭成本树；设置 `costInsights.enabled` 决定 `costInsights` Tree View 是否在 Explorer 中显示。
 
 **Manifest**：
@@ -97,7 +104,7 @@ vscode.workspace.onDidChangeConfiguration(e => {
 });
 ```
 
-### 4.2 数据源选择：配置驱动 TreeDataProvider 行为
+### 4.2 UC-TREE-02 数据源选择：配置驱动 TreeDataProvider 行为
 **场景**：云资源树支持“生产环境”与“测试环境”两个 API 端点，用户通过设置选择数据源，Tree View 在切换后刷新。
 
 **Manifest**：
@@ -140,7 +147,7 @@ class CloudTreeProvider implements vscode.TreeDataProvider<CloudNode> {
 }
 ```
 
-### 4.3 刷新频率：设置与命令联动
+### 4.3 UC-TREE-04 刷新频率：设置与命令联动
 **场景**：日志树支持自动刷新，频率由 `logTree.refreshInterval` 控制；用户可通过命令调整并即时应用。
 
 **Manifest**：
@@ -189,7 +196,7 @@ vscode.commands.registerCommand("logTree.setInterval", async () => {
 });
 ```
 
-### 4.4 视图过滤器：配置 + 上下文键
+### 4.4 UC-TREE-03 视图过滤器：配置 + 上下文键
 **场景**：依赖树允许配置危害级别过滤（`critical`/`moderate`/`all`），对应菜单与 TreeItem 展示随配置变化。
 
 **Manifest**：

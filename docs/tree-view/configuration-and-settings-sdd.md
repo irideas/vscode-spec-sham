@@ -1,7 +1,7 @@
 # Configuration & Settings 软件设计说明书 (SDD)
 
 ## 1. 文档目的
-阐述 VS Code 配置体系在 Tree View 扩展中的实现策略，包括 schema 定义、运行时读取、设置同步与数据绑定模式。
+阐述 VS Code 配置体系在 Tree View 扩展中的实现策略，包括 schema 定义、运行时读取、设置同步与数据绑定模式。本文以设计建议和实现模式为主，非 VS Code 平台硬约束。
 
 ## 2. 与 Tree View 的关系概述
 - Tree View 是否可见、如何过滤、加载哪个数据源常由配置决定；
@@ -24,14 +24,14 @@
 - Tree View 相关设置可标记 `scope` 以决定是否随工作区同步。
 
 ### 3.3 Workspace Configuration Service
-- `workspace.getConfiguration(section)` 返回合并视图；
+- `workspace.getConfiguration(section, resource?)` 返回合并视图，可按资源/工作区分层；
 - `onDidChangeConfiguration` 触发时提供 `ConfigurationChangeEvent`。
 
 ## 4. 设计细节
 ### 4.1 Schema 定义与校验
 - 所有 Tree View 相关设置建议以扩展标识为前缀（如 `cloudTools.environment`）；
-- 使用 `enum` + `enumDescriptions` 保证值合法；
-- 对敏感值应利用 SecretStorage，而非 configuration。
+- 使用 `enum` + `enumDescriptions` 保证值合法，对对象类型用 `patternProperties`/`additionalProperties` 约束结构；
+- 对敏感值应利用 SecretStorage，而非 configuration；`scope` 需明确（application/window/resource）。
 
 ### 4.2 配置事件传递
 - Provider 在构造函数中注册 `onDidChangeConfiguration`；

@@ -37,6 +37,9 @@
 - **QA / 文档**：根据“端到端流程 / 质量门槛”章节设计回归脚本、培训内容与运行手册。
 - **扩展作者**：直接引用 Manifest / TypeScript 片段，快速验证 Tree View 方案或对标官方行为。
 
+## 版本基线
+- 默认假设 `engines.vscode` ≥ 1.80（包含 TreeItem 复选框、Views Welcome、URI Handler 等能力）。实际落地请与项目的 VS Code 引擎版本对齐，若需兼容更旧版本请在章节内查阅兼容性提示。
+
 ## 本地开发与部署
 
 ### 环境准备

@@ -1,7 +1,7 @@
 # Workbench 视图与容器软件设计说明书 (SDD)
 
 ## 1. 文档目的
-给出 VS Code Workbench 中视图容器（View Containers）与 Tree View 协同的实现策略，帮助平台与扩展团队在 Activity Bar、Side Bar、Panel 等区域上构建一致、可维护的视图体验。
+给出 VS Code Workbench 中视图容器（View Containers）与 Tree View 协同的实现策略，帮助平台与扩展团队在 Activity Bar、Side Bar、Panel 等区域上构建一致、可维护的视图体验。本文以设计建议与模式为主，非 VS Code 平台的硬性约束。
 
 ## 2. 与 Tree View 的关系概述
 - Tree View 必须挂载在容器之下，由容器负责可见性、焦点、布局及上下文键（`view == <id>`）。
@@ -26,10 +26,14 @@
 - 从扩展 Manifest 解析 `contributes.viewsContainers` 与 `views`。
 - 支持运行时添加/移除视图（比如 Experiments），并触发 UI 更新。
 
+### 3.4 View Location 抽象
+- 视图最终呈现在 Sidebar / Panel / Auxiliary Bar 等位置，Container 是逻辑集合，位置由 Workbench 布局控制；
+- 视图从 Sidebar 迁移到 Panel 不会触发重新激活，仅更新位置与焦点，上下文键随位置变化。
+
 ## 4. 设计考虑
 ### 4.1 布局持久化
 - 使用 `StorageService` 保存容器顺序、侧栏位置、视图可见性；
-- Tree View 自身的展开状态由 TreeView 控件管理，容器只保存“当前可见视图”。
+- Tree View 自身的展开状态由 Tree View 组件管理，容器只保存“当前可见视图”。
 
 ### 4.2 容器激活路由
 - `workbench.view.explorer` 等命令调用 View Service 打开目标容器；
@@ -39,6 +43,7 @@
 ### 4.3 上下文键传播
 - 容器激活时设置 `activeViewlet`、`view == <id>` 等上下文键；
 - Tree View 事件（selection、visibility）可进一步触发扩展自定义上下文，用于菜单/快捷键控制。
+- 焦点链路：视图获得焦点后，`view == <id>`/`focusedView == <id>` 置为 true，供 Commands/Keybindings 章节引用。
 
 ## 5. 推荐实现模式
 
