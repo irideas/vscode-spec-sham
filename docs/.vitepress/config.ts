@@ -12,6 +12,10 @@ export default defineConfig({
       {
         text: 'Tree View 生态',
         link: '/tree-view/'
+      },
+      {
+        text: '外部入口与集成',
+        link: '/external-entry/'
       }
     ],
     sidebar: {
@@ -64,13 +68,42 @@ export default defineConfig({
             { text: '设计指导 SDD', link: '/tree-view/uri-handler-and-deep-links-sdd' }
           ]
         }
+      ],
+      '/external-entry/': [
+        {
+          text: '外部入口与集成',
+          items: [
+            { text: '章节总览', link: '/external-entry/' }
+          ]
+        },
+        {
+          text: 'URI 与外部链接',
+          items: [
+            { text: '事实需求 SRS', link: '/external-entry/uri-and-links-srs' },
+            { text: '设计指导 SDD', link: '/external-entry/uri-and-links-sdd' }
+          ]
+        },
+        {
+          text: '安全与信任（占位）',
+          items: [
+            { text: '事实需求 SRS', link: '/external-entry/auth-and-trust-srs' },
+            { text: '设计指导 SDD', link: '/external-entry/auth-and-trust-sdd' }
+          ]
+        },
+        {
+          text: 'Remote/Web 路由（占位）',
+          items: [
+            { text: '事实需求 SRS', link: '/external-entry/remote-routing-srs' },
+            { text: '设计指导 SDD', link: '/external-entry/remote-routing-sdd' }
+          ]
+        }
       ]
     },
     socialLinks: [
       { icon: 'github', link: 'https://github.com/irideas/vscode-spec-sham' }
     ],
     footer: {
-      message: '为 VSCode Tree View 生态编写的规格与设计指南（模拟版）',
+      message: 'VS Code 关键能力规格与设计指南（模拟版）',
       copyright: '以开放协作为目标的内部模拟文档'
     }
   }
