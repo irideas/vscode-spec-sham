@@ -16,6 +16,10 @@ export default defineConfig({
       {
         text: '外部入口与集成',
         link: '/external-entry/'
+      },
+      {
+        text: 'Configuration 系统',
+        link: '/configuration-system/'
       }
     ],
     sidebar: {
@@ -95,6 +99,49 @@ export default defineConfig({
           items: [
             { text: '事实需求 SRS', link: '/external-entry/remote-routing-srs' },
             { text: '设计指导 SDD', link: '/external-entry/remote-routing-sdd' }
+          ]
+        }
+      ],
+      '/configuration-system/': [
+        {
+          text: 'Configuration 系统',
+          items: [
+            { text: '章节总览', link: '/configuration-system/' }
+          ]
+        },
+        {
+          text: '体系总览',
+          items: [
+            { text: '事实需求 SRS', link: '/configuration-system/configuration-core-srs' },
+            { text: '设计指导 SDD', link: '/configuration-system/configuration-core-sdd' }
+          ]
+        },
+        {
+          text: '声明子系统',
+          items: [
+            { text: '事实需求 SRS', link: '/configuration-system/configuration-declaration-srs' },
+            { text: '设计指导 SDD', link: '/configuration-system/configuration-declaration-sdd' }
+          ]
+        },
+        {
+          text: '存储与分层子系统',
+          items: [
+            { text: '事实需求 SRS', link: '/configuration-system/configuration-storage-layering-srs' },
+            { text: '设计指导 SDD', link: '/configuration-system/configuration-storage-layering-sdd' }
+          ]
+        },
+        {
+          text: '访问与变更子系统',
+          items: [
+            { text: '事实需求 SRS', link: '/configuration-system/configuration-access-update-srs' },
+            { text: '设计指导 SDD', link: '/configuration-system/configuration-access-update-sdd' }
+          ]
+        },
+        {
+          text: 'Settings UI 子系统',
+          items: [
+            { text: '事实需求 SRS', link: '/configuration-system/configuration-settings-ui-srs' },
+            { text: '设计指导 SDD', link: '/configuration-system/configuration-settings-ui-sdd' }
           ]
         }
       ]
