@@ -239,6 +239,11 @@ vscode.commands.registerCommand("costInsights.copyLink", (node: CostNode) => {
 - 探索与 Notebook/Panel 的双向桥接，允许 TreeItem 直接驱动富媒体视图。
 
 ## 8. 端到端实现流程指南
+
+## 9. 测试与验证建议（占位）
+- 针对关键场景（懒加载/分页、URI reveal、配置驱动刷新、checkbox 自动/手动模式）准备最小回归用例；
+- 覆盖 A11y 与本地化检查（label/tooltip/aria/localize）；
+- 建议在 CI 中运行 `npm run docs:build` 或等效检查，确保文档锚点与链接有效。
 1. **Manifest & 激活**：声明视图、命令、配置与激活事件，确保 `onView:<id>` 与 `onCommand` 覆盖核心入口；
 2. **数据与 Provider**：按照本 SDD 第 4 章划分 Service/Provider/TreeView，预先决定缓存策略与性能指标；
 3. **交互绑定**：利用第 5 章的命令/URI 模式，将 TreeItem contextValue、菜单 when clause、快捷键对齐；

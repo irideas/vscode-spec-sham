@@ -59,6 +59,10 @@
 4. **刷新与持久化**：Provider 调用 `onDidChangeTreeData` 增量刷新 → 容器持久化布局与可见性；
 5. **外部访问**：配置更改、URI Handler、命令面板等入口可驱动 Tree View，必要时通过 `TreeView.reveal` 或 `TreeView.message` 向用户反馈。
 
+### 3.5 非目标（占位）
+- 不覆盖 VS Code 以外 UI 容器的行为；
+- 平台级 URI/安全/Remote 协议详见 /external-entry/，本章仅保留 Tree 协作事实。
+
 ## 4. 功能性需求
 
 ### 4.1 TreeDataProvider 生命周期与调用语义

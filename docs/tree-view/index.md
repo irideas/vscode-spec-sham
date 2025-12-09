@@ -18,13 +18,13 @@
 ## 文档矩阵
 | 域 | SRS | SDD | 摘要 |
 | --- | --- | --- | --- |
-| Tree View 主域 | [tree-view-srs.md](./tree-view-srs.md) | [tree-view-sdd.md](./tree-view-sdd.md) | 核心 API 契约、用例 UC-TREE-01~06、刷新/错误语义与设计模式。 |
-| Workbench 视图与容器 | [workbench-views-and-containers-srs.md](./workbench-views-and-containers-srs.md) | [workbench-views-and-containers-sdd.md](./workbench-views-and-containers-sdd.md) | 容器注册/激活/布局与上下文传播，View Location 迁移与焦点链路。 |
-| Commands / Menus / Keybindings | [commands-menus-and-keybindings-srs.md](./commands-menus-and-keybindings-srs.md) | [commands-menus-and-keybindings-sdd.md](./commands-menus-and-keybindings-sdd.md) | 命令/菜单/快捷键生命周期，命令适配器与反模式。 |
-| Activation & Context System | [activation-and-context-system-srs.md](./activation-and-context-system-srs.md) | [activation-and-context-system-sdd.md](./activation-and-context-system-sdd.md) | 激活事件、Context Key 作用域、when clause 调试与延迟激活策略。 |
-| Configuration & Settings | [configuration-and-settings-srs.md](./configuration-and-settings-srs.md) | [configuration-and-settings-sdd.md](./configuration-and-settings-sdd.md) | 配置 schema/范围/监听，settings-backed Provider 与远端配置模式。 |
-| URI Handler & Deep Links（Tree 桥接） | [uri-handler-and-deep-links-srs.md](./uri-handler-and-deep-links-srs.md) | [uri-handler-and-deep-links-sdd.md](./uri-handler-and-deep-links-sdd.md) | 仅保留 Tree View 协作摘要；平台级协议/安全/Remote 行为详见 [外部入口 SRS](/external-entry/uri-and-links-srs) / [外部入口 SDD](/external-entry/uri-and-links-sdd)。 |
-| 外部入口与集成（独立域） | [外部入口索引](/external-entry/) | — | 平台级外部入口/URI 集成生态概览，含完整用例 UC-URI-01~04 与安全/Remote 占位。 |
+| Tree View 主域 | [/tree-view/tree-view-srs](/tree-view/tree-view-srs) | [/tree-view/tree-view-sdd](/tree-view/tree-view-sdd) | 核心 API 契约、用例 UC-TREE-01~06、刷新/错误语义与设计模式。 |
+| Workbench 视图与容器 | [/tree-view/workbench-views-and-containers-srs](/tree-view/workbench-views-and-containers-srs) | [/tree-view/workbench-views-and-containers-sdd](/tree-view/workbench-views-and-containers-sdd) | 容器注册/激活/布局与上下文传播，View Location 迁移与焦点链路。 |
+| Commands / Menus / Keybindings | [/tree-view/commands-menus-and-keybindings-srs](/tree-view/commands-menus-and-keybindings-srs) | [/tree-view/commands-menus-and-keybindings-sdd](/tree-view/commands-menus-and-keybindings-sdd) | 命令/菜单/快捷键生命周期，命令适配器与反模式。 |
+| Activation & Context System | [/tree-view/activation-and-context-system-srs](/tree-view/activation-and-context-system-srs) | [/tree-view/activation-and-context-system-sdd](/tree-view/activation-and-context-system-sdd) | 激活事件、Context Key 作用域、when clause 调试与延迟激活策略。 |
+| Configuration & Settings | [/tree-view/configuration-and-settings-srs](/tree-view/configuration-and-settings-srs) | [/tree-view/configuration-and-settings-sdd](/tree-view/configuration-and-settings-sdd) | 配置 schema/范围/监听，settings-backed Provider 与远端配置模式。 |
+| URI Handler & Deep Links（Tree 桥接） | [/tree-view/uri-handler-and-deep-links-srs](/tree-view/uri-handler-and-deep-links-srs) | [/tree-view/uri-handler-and-deep-links-sdd](/tree-view/uri-handler-and-deep-links-sdd) | 仅保留 Tree View 协作摘要；平台级协议/安全/Remote 行为详见 [外部入口 SRS](/external-entry/uri-and-links-srs) / [外部入口 SDD](/external-entry/uri-and-links-sdd)。 |
+| 外部入口与集成（独立域） | [/external-entry/](/external-entry/) | — | 平台级外部入口/URI 集成生态概览，含完整用例 UC-URI-01~04 与安全/Remote 占位。 |
 
 ## 用例导航
 - [UC-TREE-01](/tree-view/tree-view-srs#uc-tree-01)：团队 TODO（命令/快捷键、多状态节点）  

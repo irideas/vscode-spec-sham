@@ -40,6 +40,8 @@
 - [UC-UI-01](/configuration-system/configuration-settings-ui-srs#uc-ui-01)：用户通过 UI 修改设置  
 - [UC-UI-04](/configuration-system/configuration-settings-ui-srs#uc-ui-04)：企业策略下的锁定设置  
 
+> 如需完整用例列表，可在对应 SRS 用例章节查看 UC-STOR-01~05、UC-ACC-01~04、UC-UI-01~04 等。
+
 ## 质量与实践基线
 - **一致性**：同一 scope + Setting ID 在 UI/JSON/API 中值一致；变更必触发 `onDidChangeConfiguration`，`affectsConfiguration` 正确过滤。
 - **性能**：常用配置读取基于内存模型，目标不阻塞冷启动；`getConfiguration`/`inspect` 热路径低延迟，Settings UI 操作即时反馈。

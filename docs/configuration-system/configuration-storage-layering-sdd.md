@@ -13,7 +13,13 @@
 * 将所有 settings 文件的路径定位、读写、解析、合并封装在本子系统内部，对上游暴露统一抽象，对下游屏蔽平台与 Remote 差异；
 * 支持本地 / Remote / Profile / Policy 等多种组合场景，并保证行为可预测、可调试。
 
-### 1.3 约束与原则
+### 1.3 使用者关注点（占位）
+
+* 平台/核心工程：关注层叠合并正确性、事件与访问层一致性、Remote/Policy 挂接。
+* 扩展作者/集成：关注 API 读取结果一致、写入路径与 scope 匹配。
+* QA/运维：关注损坏恢复、Remote/Policy/多根场景的可靠性与可观测性。
+
+### 1.4 约束与原则
 
 * 必须符合 VS Code 官方语义：User / Remote / Workspace / Folder / Language-specific 的优先级与行为；
 * 必须与 Configuration 声明子系统约定的数据结构兼容（如默认值、Schema 信息）；

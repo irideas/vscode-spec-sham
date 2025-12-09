@@ -13,6 +13,11 @@
 * 不改变 VS Code 对外 API 语义（`workspace.getConfiguration`、`onDidChangeConfiguration` 等要兼容既有扩展）；
 * 兼容现有 settings 文件结构、默认设置与 Settings Sync / Policy 行为。
 
+### 1.3 使用者关注点（占位）
+- 平台/核心工程：关心层叠模型、事件一致性、Policy/Sync 挂接。
+- 扩展作者：关心 API 语义与类型/Scope 检查、变更事件过滤。
+- QA/文档：关心端到端流程、质量/性能门槛与可观测性。
+
 ---
 
 ## 2. 总体架构与分层
