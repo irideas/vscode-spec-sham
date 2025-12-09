@@ -353,7 +353,7 @@ Policy 系统负责：从 OS/MDM/JSON policy 读取策略值，并按约定 ID �
 
 ## 8. 系统级用例（Use Cases）
 
-### UC-CORE-01 工作区级定制编辑行为
+### UC-CORE-01 工作区级定制编辑行为 {#uc-core-01}
 
 * 用户在 Settings UI 中切换到 Workspace 视图；
 * 修改 `editor.tabSize`，设置只影响当前工作区；
@@ -361,25 +361,25 @@ Policy 系统负责：从 OS/MDM/JSON policy 读取策略值，并按约定 ID �
 * Core 重新计算该 workspace 的有效值并触发变更事件；
 * 编辑器和扩展根据变更更新行为。
 
-### UC-CORE-02 扩展声明并使用自己的 settings
+### UC-CORE-02 扩展声明并使用自己的 settings {#uc-core-02}
 
 * 扩展在 `package.json` 中通过 `contributes.configuration` 声明 settings；
 * Settings UI 展示这些设置，支持用户在不同 scope 上修改；
 * 扩展通过 `workspace.getConfiguration('myExtension')` 读取，订阅 `onDidChangeConfiguration` 响应变更。
 
-### UC-CORE-03 语言特定设置
+### UC-CORE-03 语言特定设置 {#uc-core-03}
 
 * 用户在设置中添加 `"[typescript]": { "editor.tabSize": 2 }`；
 * 在 TS 文件中，tabSize 使用 2；在其他语言中使用各自层叠后的值。
 
-### UC-CORE-04 Settings Sync 跨设备同步
+### UC-CORE-04 Settings Sync 跨设备同步 {#uc-core-04}
 
 * 用户在设备 A 上开启 Sync，修改某些 settings；
 * Sync 将用户设置（过滤 machine / ignored）上传到云端；
 * 设备 B 启用 Sync 后拉取并应用这些设置；
 * 两侧均通过 Configuration Core 的 API 读写 settings。
 
-### UC-CORE-05 企业策略锁定设置
+### UC-CORE-05 企业策略锁定设置 {#uc-core-05}
 
 * 企业通过 Policy 系统配置某些 settings 的策略值；
 * Policy 层注入后覆盖用户值；

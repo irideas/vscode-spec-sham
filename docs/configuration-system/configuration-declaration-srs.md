@@ -391,7 +391,7 @@ Configuration 声明子系统是 **Configuration Core 的 4 个子系统之一**
 
 ## 8. 典型用例（Use Cases）
 
-### UC-DECL-01 扩展声明简单设置
+### UC-DECL-01 扩展声明简单设置 {#uc-decl-01}
 
 * 扩展在 `package.json` 中添加：
 
@@ -414,25 +414,25 @@ Configuration 声明子系统是 **Configuration Core 的 4 个子系统之一**
 * Settings UI 在“扩展 → My Extension”中显示对应开关；
 * `settings.json` 获得该 key 的自动补全与类型校验。
 
-### UC-DECL-02 将配置拆分为多个类别
+### UC-DECL-02 将配置拆分为多个类别 {#uc-decl-02}
 
 * 扩展将 `configuration` 设为数组，将 Setting 拆成“Content”“Appearance”等类别；
 * 声明子系统注册多个类别；
 * Settings UI 中该扩展的设置页显示多个分组面板。
 
-### UC-DECL-03 声明资源级 Setting（resource scope）
+### UC-DECL-03 声明资源级 Setting（resource scope） {#uc-decl-03}
 
 * 某扩展提供 `git.alwaysSignOff` 设置，声明 `scope: "resource"`；
 * Registry 将 scope 信息写入 Schema；
 * 存储与分层子系统根据 scope 决定该设置可写入哪些层（User / Workspace / Folder）以及合并策略。
 
-### UC-DECL-04 声明非同步设置
+### UC-DECL-04 声明非同步设置 {#uc-decl-04}
 
 * 扩展声明 `remoteTunnelAccess.machineName` 并设置 `ignoreSync: true`；
 * 对 Sync 系统而言，该 Setting 默认不参与同步；
 * Policy 系统仍可以引用该 Setting 进行本机策略控制（视策略设计而定）。
 
-### UC-DECL-05 通过 configurationDefaults 覆盖语言特定默认值
+### UC-DECL-05 通过 configurationDefaults 覆盖语言特定默认值 {#uc-decl-05}
 
 * 扩展通过 `configurationDefaults` 为 `"[markdown]"` 提供默认编辑器设置（如 `wordWrap`）；
 * 声明子系统校验 key 并注册 default override；

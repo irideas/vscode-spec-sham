@@ -399,28 +399,28 @@ Settings Sync 与 Enterprise Policy 都是 VS Code 外部的独立系统，不�
 
 ## 7. 典型用例
 
-### UC-UI-01 普通用户通过 UI 修改设置
+### UC-UI-01 普通用户通过 UI 修改设置 {#uc-ui-01}
 
 * 用户使用快捷键打开 Settings UI；
 * 在搜索框中输入关键字（如 “font size”）；
 * 切换到 User 作用域，修改字体大小 setting；
 * 修改立即生效，条目左侧出现修改标记；输入 `@modified` 后可筛选出该 setting。
 
-### UC-UI-02 团队通过 Workspace 设置共享配置
+### UC-UI-02 团队通过 Workspace 设置共享配置 {#uc-ui-02}
 
 * 团队在仓库中维护 `.vscode/settings.json`；
 * 成员打开项目，打开 Settings UI 并切换到 Workspace 视图；
 * 在 Workspace 视图下修改格式化相关设置，写入 `.vscode/settings.json`；
 * 所有团队成员在该仓库下获得统一的 workspace 设置。
 
-### UC-UI-03 高级用户在 UI 与 JSON 之间切换
+### UC-UI-03 高级用户在 UI 与 JSON 之间切换 {#uc-ui-03}
 
 * 用户在 Settings UI 中看到部分设置不易批量编辑；
 * 点击 UI 顶部的 JSON 按钮打开 User settings.json；
 * 使用 IntelliSense 补全 setting ID 和枚举值，批量复制粘贴配置；
 * 保存后返回 Settings UI，相关 setting 的值和修改标记已更新。
 
-### UC-UI-04 企业策略下的锁定设置
+### UC-UI-04 企业策略下的锁定设置 {#uc-ui-04}
 
 * 企业通过 Policy 系统强制某些隐私相关设置为特定值；
 * 用户在 Settings UI 中看到这些设置被标记为「由组织管理」，控件禁用；

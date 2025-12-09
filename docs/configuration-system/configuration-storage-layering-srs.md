@@ -373,7 +373,7 @@
 
 ## 7. 典型用例
 
-### UC-STOR-01 单文件夹工作区配置覆盖
+### UC-STOR-01 单文件夹工作区配置覆盖 {#uc-stor-01}
 
 * 用户在 User settings 中设置 `editor.fontSize = 13`；
 * 在某项目根目录 `.vscode/settings.json` 中设置 `editor.fontSize = 18`；
@@ -382,7 +382,7 @@
   * 有效值为 18；
   * `inspect` 显示 Default / User / Workspace/Folders 各层具体值与来源。
 
-### UC-STOR-02 多根工作区 + Folder 设置
+### UC-STOR-02 多根工作区 + Folder 设置 {#uc-stor-02}
 
 * 用户创建包含 A/B 两个根目录的 `.code-workspace`；
 * `.code-workspace` 中设置 `"files.exclude"`；
@@ -392,7 +392,7 @@
   * 对 A 目录资源，使用 Workspace + A Folder 叠加结果；
   * 对 B 目录资源，仅使用 Workspace 设置。
 
-### UC-STOR-03 Profile 切换
+### UC-STOR-03 Profile 切换 {#uc-stor-03}
 
 * Profile A 中 `editor.fontSize = 13`，Profile B 中 `editor.fontSize = 11`；
 * 在同一 Workspace 中切换 Profile：
@@ -401,7 +401,7 @@
   * Workspace/Folders 层保持不变；
   * 有效值随 Profile 变化。
 
-### UC-STOR-04 Remote 工作区
+### UC-STOR-04 Remote 工作区 {#uc-stor-04}
 
 * 用户通过 Remote 方式连接远程工作区；
 * 在远程 user settings 中设置某配置，在本地 user settings 中设置另一值；
@@ -410,7 +410,7 @@
   * 按优先级顺序叠加本地 User、Remote User、Workspace / Remote Workspace 等层；
   * Remote 环境断开时，回退到本地数据。
 
-### UC-STOR-05 Policy 覆盖场景
+### UC-STOR-05 Policy 覆盖场景 {#uc-stor-05}
 
 * 企业策略强制某设置值（如禁用遥测）；
 * 用户在 User 或 Workspace 中配置相反的值；

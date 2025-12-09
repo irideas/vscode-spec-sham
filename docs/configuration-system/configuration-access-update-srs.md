@@ -375,7 +375,7 @@ ConfigurationScope 用于：
 
 ## 7. 典型用例
 
-### UC-ACC-01 扩展读取自身设置并响应变更
+### UC-ACC-01 扩展读取自身设置并响应变更 {#uc-acc-01}
 
 * 场景：
 
@@ -389,7 +389,7 @@ ConfigurationScope 用于：
   * 当设置被修改时，事件触发且 `affectsConfiguration('myExtension.featureXEnabled')` 为 `true`；
   * 扩展可在 handler 中根据新值调整行为。
 
-### UC-ACC-02 扩展写入用户级设置
+### UC-ACC-02 扩展写入用户级设置 {#uc-acc-02}
 
 * 场景：
 
@@ -401,7 +401,7 @@ ConfigurationScope 用于：
   * 写入成功后，User 层 settings 文件被持久化更新；
   * 所有工作区在后续读取中都能看到该值。
 
-### UC-ACC-03 写入语言特定设置
+### UC-ACC-03 写入语言特定设置 {#uc-acc-03}
 
 * 场景：
 
@@ -413,7 +413,7 @@ ConfigurationScope 用于：
   * 调用 `update('editor.fontSize', 14, ConfigurationTarget.Workspace, true)`；
   * 更新被写入 Workspace 级 `[markdown]` 块，仅对 Markdown 文档生效。
 
-### UC-ACC-04 使用 inspect 诊断复杂叠加
+### UC-ACC-04 使用 inspect 诊断复杂叠加 {#uc-acc-04}
 
 * 场景：
 
