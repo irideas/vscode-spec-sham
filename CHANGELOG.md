@@ -1,5 +1,10 @@
 # 变更日志
 
+## 0.6.0 - 2025-12-09
+- 协作规范拆分：根 `AGENTS.md` 精简为入口索引，新增 `agents/rules-*.md` 分拆文件（流程、Git/提交、自检、文档模板与链接规范）。
+- 明确“就近 AGENTS 优先”与覆盖记录路径，便于智能体遵守规范。
+- 构建：`npm run docs:build` 通过。
+
 ## 0.5.0 - 2025-12-09
 - 新增 Configuration 系统域：补齐 index 与站点导航/sidebar，首页纳入配置域，文档矩阵与用例导航使用绝对路径。
 - 配置域 SRS/SDD 重排与基线补充：Core/Declaration/Storage/Access/Settings UI 对齐统一模板，增加基线引用、非目标、质量门槛与演进占位。
