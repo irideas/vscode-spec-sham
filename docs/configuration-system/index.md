@@ -1,4 +1,4 @@
-# VS Code Configuration 系统总览（SRS + SDD 导航）
+# VS Code Configuration 系统总览
 
 本页为 VS Code Configuration 系统（settings 配置底座）的总览入口，涵盖声明、存储与分层、访问与变更、Settings UI 四个子系统，以及体系级 SRS/SDD。默认基线为 `engines.vscode` ≥ 1.80；Settings Sync、Enterprise Policy 作为外部系统在此仅做接口视角。
 

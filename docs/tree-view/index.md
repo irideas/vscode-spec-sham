@@ -1,4 +1,4 @@
-# VS Code Tree View 生态全览（SRS + SDD 导航）
+# VS Code Tree View 生态全览
 
 本页是 Tree View 生态的总览与导览，帮助读者在进入 12 篇 SRS/SDD 前建立统一的认知模型：Tree View 如何声明与激活、如何被 Workbench 承载、又如何与命令/菜单/上下文/配置/深链协同。默认版本基线为 `engines.vscode` ≥ 1.80（包含 TreeItem 复选框、Views Welcome、URI Handler 等能力），落地时请与实际引擎版本对齐。外部入口/深链的完整协议与安全约束已迁移至 [外部入口域](/external-entry/)，本册仅保留 Tree View 协作摘要。
 
